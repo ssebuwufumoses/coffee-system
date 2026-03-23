@@ -323,9 +323,9 @@ export default function NewMillingBatchPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-5 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
                   {/* Farmer search */}
-                  <div className="col-span-3 space-y-1 relative">
+                  <div className="sm:col-span-3 space-y-1 relative">
                     <Label className="text-xs">Farmer <span className="text-secondary">*</span></Label>
                     <div className="relative">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
@@ -375,7 +375,7 @@ export default function NewMillingBatchPage() {
                   </div>
 
                   {/* Input KG */}
-                  <div className="col-span-2 space-y-1">
+                  <div className="sm:col-span-2 space-y-1">
                     <Label className="text-xs">
                       {batchType === "GROUP" ? "Their Input (kg)" : "Input Weight (kg)"}
                       <span className="text-secondary ml-0.5">*</span>
