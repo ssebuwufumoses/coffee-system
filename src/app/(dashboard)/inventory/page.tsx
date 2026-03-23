@@ -420,79 +420,76 @@ export default function InventoryPage() {
           <span className="text-xs text-[#9B9B9B] font-medium">Last 30 entries</span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#E8E8E8] bg-[#F6F6F6]">
-                <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Date</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Item</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Type</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Flow</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Qty (kg)</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Balance</th>
-                <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">By</th>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[#E8E8E8] bg-[#F6F6F6]">
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Item</th>
+              <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Type</th>
+              <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Flow</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Qty (kg)</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Balance</th>
+              <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">By</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#F0F0F0]">
+            {movements.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center py-14">
+                  <Activity className="h-8 w-8 text-[#E0E0E0] mx-auto mb-2" aria-hidden="true" />
+                  <p className="text-sm font-medium text-[#6B6B6B]">No stock movements recorded yet</p>
+                  <p className="text-xs text-[#9B9B9B] mt-1">Changes from intake, milling and sales appear here</p>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F0F0F0]">
-              {movements.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-14">
-                    <Activity className="h-8 w-8 text-[#E0E0E0] mx-auto mb-2" aria-hidden="true" />
-                    <p className="text-sm font-medium text-[#6B6B6B]">No stock movements recorded yet</p>
-                    <p className="text-xs text-[#9B9B9B] mt-1">Changes from intake, milling and sales appear here</p>
-                  </td>
-                </tr>
-              ) : (
-                movements.map((m) => {
-                  const isIn = m.direction === "IN";
-                  const cat = CAT[m.inventoryItem.category as keyof typeof CAT] ?? CAT.OTHER;
-                  const { Icon: ItemIcon } = cat;
+            ) : (
+              movements.map((m) => {
+                const isIn = m.direction === "IN";
+                const cat = CAT[m.inventoryItem.category as keyof typeof CAT] ?? CAT.OTHER;
+                const { Icon: ItemIcon } = cat;
 
-                  return (
-                    <tr key={m.id} className="hover:bg-[#F9F9F9] transition-colors">
-                      <td className="px-5 py-3.5">
-                        <p className="text-sm font-medium text-[#1D1D1D]">{fmtDate(m.createdAt)}</p>
-                        <p className="text-xs text-[#9B9B9B]">{fmtTime(m.createdAt)}</p>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <ItemIcon className="h-3.5 w-3.5 flex-shrink-0 text-[#9B9B9B]" aria-hidden="true" />
-                          <span className="font-medium text-[#1D1D1D]">{m.inventoryItem.name}</span>
+                return (
+                  <tr key={m.id} className="hover:bg-[#F9F9F9] transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <ItemIcon className="h-3.5 w-3.5 flex-shrink-0 text-[#9B9B9B]" aria-hidden="true" />
+                        <div>
+                          <p className="font-medium text-[#1D1D1D]">{m.inventoryItem.name}</p>
+                          <p className="text-xs text-[#9B9B9B] sm:hidden">{fmtDate(m.createdAt)}</p>
                         </div>
-                      </td>
-                      <td className="px-4 py-3.5 text-[#6B6B6B]">
-                        {TX_LABELS[m.movementType] ?? m.movementType}
-                      </td>
-                      <td className="px-4 py-3.5 text-center">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
-                          isIn
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : "bg-red-50 border-red-200 text-red-700"
-                        }`}>
-                          {isIn
-                            ? <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-                            : <ArrowDownRight className="h-3 w-3" aria-hidden="true" />}
-                          {isIn ? "IN" : "OUT"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <span className={`text-sm font-bold ${isIn ? "text-emerald-700" : "text-red-700"}`}>
-                          {isIn ? "+" : "−"}{parseFloat(m.quantityKg).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3.5 text-right">
-                        <span className="text-sm font-semibold text-[#1D1D1D]">
-                          {parseFloat(m.balanceAfterKg).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-[#6B6B6B] text-sm">{m.recordedBy.name}</td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-[#6B6B6B] hidden sm:table-cell">
+                      <p>{TX_LABELS[m.movementType] ?? m.movementType}</p>
+                      <p className="text-xs text-[#9B9B9B]">{fmtDate(m.createdAt)}</p>
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
+                        isIn
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                          : "bg-red-50 border-red-200 text-red-700"
+                      }`}>
+                        {isIn
+                          ? <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+                          : <ArrowDownRight className="h-3 w-3" aria-hidden="true" />}
+                        {isIn ? "IN" : "OUT"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <span className={`text-sm font-bold ${isIn ? "text-emerald-700" : "text-red-700"}`}>
+                        {isIn ? "+" : "−"}{parseFloat(m.quantityKg).toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-right hidden md:table-cell">
+                      <span className="text-sm font-semibold text-[#1D1D1D]">
+                        {parseFloat(m.balanceAfterKg).toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-[#6B6B6B] text-sm hidden lg:table-cell">{m.recordedBy.name}</td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* ── Adjust Stock Modal ───────────────────────────────────────────── */}
