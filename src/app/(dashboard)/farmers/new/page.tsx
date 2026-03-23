@@ -130,7 +130,8 @@ export default function NewFarmerPage() {
         return;
       }
 
-      router.push(`/farmers/${data.farmer.id}?created=1`);
+      const farmer = data.farmer as { id: string };
+      router.push(`/farmers/${farmer.id}?created=1`);
     } finally {
       setLoading(false);
     }

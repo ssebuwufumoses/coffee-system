@@ -96,9 +96,9 @@ export default async function DeliveryReceiptPage({
                   : null,
                 ["Recorded By", delivery.recordedBy.name],
               ]
-                .filter(Boolean)
+                .filter((row): row is [string, string] => row !== null)
                 .map(([label, value], i, arr) => (
-                  <tr key={label as string} style={{ borderBottom: i < arr.length - 1 ? "1px solid #F0F0F0" : "none" }}>
+                  <tr key={label} style={{ borderBottom: i < arr.length - 1 ? "1px solid #F0F0F0" : "none" }}>
                     <td style={{ padding: "10px 0", color: "#9B9B9B", width: "45%" }}>{label}</td>
                     <td style={{ padding: "10px 0", fontWeight: 600, color: "#1D1D1D" }}>{value}</td>
                   </tr>

@@ -151,16 +151,17 @@ export default function NewIntakePage() {
       }
 
       const gradeLabel = UCDA_GRADES.find(g => g.value === form.ucdaGrade)?.label ?? form.ucdaGrade;
+      const delivery = data.delivery as { id: string };
       setSuccessData({
-        deliveryId: data.delivery.id,
+        deliveryId: delivery.id,
         farmerName: selectedFarmer?.name ?? "",
         farmerCode: selectedFarmer?.farmerCode ?? "",
         weightKg: parseFloat(form.weightKg),
         coffeeType: varieties.find(v => v.id === form.coffeeVarietyId)?.name ?? "",
         grade: gradeLabel,
-        huskAlert: data.huskAlert,
-        whatsappSent: data.whatsappSent ?? false,
-        whatsappUrl: data.whatsappUrl ?? "",
+        huskAlert: (data.huskAlert as HuskAlert) ?? null,
+        whatsappSent: (data.whatsappSent as boolean) ?? false,
+        whatsappUrl: (data.whatsappUrl as string) ?? "",
       });
     } finally {
       setLoading(false);

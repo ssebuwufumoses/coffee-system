@@ -443,7 +443,7 @@ function MillingReport({ from, to }: { from: string; to: string }) {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-1.5">
                         <Link href={`/milling/${b.id}`} className="font-bold text-[#240C64] hover:underline">{b.batchNumber}</Link>
-                        {lowYield && <AlertTriangle className="h-3.5 w-3.5 text-red-500" title="Below 45% conversion" />}
+                        {lowYield && <span title="Below 45% conversion"><AlertTriangle className="h-3.5 w-3.5 text-red-500" /></span>}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-[#6B6B6B] hidden sm:table-cell">{b.variety}</td>
