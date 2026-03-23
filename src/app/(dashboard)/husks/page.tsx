@@ -160,6 +160,18 @@ export default function HuskIssuancesPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <span className="font-bold text-deepest">{i.bagsIssued}</span>
+                    {/* Balance sub-text on mobile */}
+                    {i.farmerHuskBalance && (
+                      <div className="sm:hidden mt-0.5">
+                        {i.farmerHuskBalance.balance === 0 ? (
+                          <span className="text-xs font-semibold text-success">✓ done</span>
+                        ) : (
+                          <span className={`text-xs font-semibold ${i.farmerHuskBalance.balance > 20 ? "text-warning" : "text-primary"}`}>
+                            {i.farmerHuskBalance.balance} left
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div className="text-xs text-gray-400 hidden sm:block">
                       {new Date(i.issuedDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
                     </div>
