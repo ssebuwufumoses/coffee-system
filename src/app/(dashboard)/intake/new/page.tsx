@@ -381,7 +381,7 @@ export default function NewIntakePage() {
                 <button
                   key={f.id}
                   type="button"
-                  className="w-full text-left px-4 py-2.5 hover:bg-surface-primary text-sm flex items-center justify-between border-b border-surface-secondary last:border-0"
+                  className="w-full text-left px-4 py-2.5 hover:bg-surface-primary text-sm flex flex-col gap-0.5 border-b border-surface-secondary last:border-0"
                   onClick={() => {
                     setField("farmerId", f.id);
                     setSelectedFarmer(f);
@@ -390,11 +390,11 @@ export default function NewIntakePage() {
                   }}
                 >
                   <span className="font-semibold text-deepest">{f.name}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-gray-400 text-xs">{f.farmerCode} · {f.location}</span>
                     {!f.latitude && (
                       <span className="text-warning text-xs font-medium bg-warning/10 px-1.5 py-0.5 rounded">No GPS</span>
                     )}
-                    <span className="text-gray-400 text-xs">{f.farmerCode} · {f.location}</span>
                   </div>
                 </button>
               ))}
@@ -454,8 +454,8 @@ export default function NewIntakePage() {
           {errors.ucdaGrade && <p className="text-xs text-red-600">{errors.ucdaGrade}</p>}
         </div>
 
-        {/* Date + Weight — side by side */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Date + Weight — side by side on sm+, stacked on mobile */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="deliveryDate">
               Delivery Date <span className="text-secondary font-bold">*</span>
@@ -488,7 +488,7 @@ export default function NewIntakePage() {
         </div>
 
         {/* Quality Metrics */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="moistureContentPct">
               Moisture Content %
@@ -507,9 +507,9 @@ export default function NewIntakePage() {
             />
             {/* Live moisture warning */}
             {moistureTooHigh ? (
-              <div className="flex items-center gap-1.5 bg-red-100 border-2 border-red-400 text-red-800 rounded-lg px-3 py-2 whitespace-nowrap">
-                <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                <p className="text-xs font-bold truncate">
+              <div className="flex items-start gap-1.5 bg-red-100 border-2 border-red-400 text-red-800 rounded-lg px-3 py-2">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <p className="text-xs font-bold">
                   REJECTED: Too Wet ({moistureVal}%). Dry the coffee first.
                 </p>
               </div>
