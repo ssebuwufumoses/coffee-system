@@ -105,34 +105,36 @@ function StockCard({ item }: { item: InventoryItem }) {
   const { value, unit } = fmtKg(stock);
 
   return (
-    <div className={`bg-white rounded-lg border p-4 ${isLow ? "border-[#FECACA]" : "border-[#E8E8E8]"}`}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2 mb-3">
+    <div className={`bg-white rounded-xl border p-4 flex flex-col gap-3 ${isLow ? "border-[#FECACA] bg-red-50/20" : "border-[#E8E8E8]"}`}>
+      {/* Header row: icon + name + badge */}
+      <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Icon className="h-4 w-4 flex-shrink-0 text-[#9B9B9B]" aria-hidden="true" />
+          <div className={`p-1.5 rounded-lg flex-shrink-0 ${isLow ? "bg-red-100" : "bg-[#F3F3F3]"}`}>
+            <Icon className={`h-3.5 w-3.5 ${isLow ? "text-red-600" : "text-[#6B6B6B]"}`} aria-hidden="true" />
+          </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-[#1D1D1D] truncate">{item.name}</p>
+            <p className="text-sm font-semibold text-[#1D1D1D] leading-tight truncate">{item.name}</p>
             {item.coffeeVariety && (
-              <p className="text-xs text-[#9B9B9B] mt-0.5">{item.coffeeVariety.code} · {item.coffeeVariety.name}</p>
+              <p className="text-xs text-[#9B9B9B] mt-0.5 truncate">{item.coffeeVariety.code}</p>
             )}
           </div>
         </div>
         {isLow ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-red-50 border border-red-200 px-2.5 py-0.5 text-xs font-semibold text-red-700 flex-shrink-0">
-            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 border border-red-200 px-2 py-0.5 text-xs font-bold text-red-700 flex-shrink-0">
+            <AlertTriangle className="h-2.5 w-2.5" aria-hidden="true" />
             Low
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 flex-shrink-0">
+          <span className="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-xs font-bold text-emerald-700 flex-shrink-0">
             OK
           </span>
         )}
       </div>
 
-      {/* Number — big and dark like Cloudflare */}
-      <div className="flex items-baseline gap-1.5 mb-3">
+      {/* Stock number */}
+      <div className="flex items-baseline gap-1.5">
         <span
-          className="text-[1.75rem] font-bold leading-none tracking-tight"
+          className="text-2xl sm:text-3xl font-bold leading-none tracking-tight"
           style={{ color: isLow ? "#B91C1C" : "#1D1D1D" }}
         >
           {value}
@@ -141,8 +143,8 @@ function StockCard({ item }: { item: InventoryItem }) {
       </div>
 
       {/* Progress bar */}
-      {barPct !== null && (
-        <div className="space-y-1">
+      {barPct !== null ? (
+        <div className="space-y-1 mt-auto">
           <div
             className="h-1.5 w-full bg-[#F3F3F3] rounded-full overflow-hidden"
             role="progressbar"
@@ -160,9 +162,11 @@ function StockCard({ item }: { item: InventoryItem }) {
             />
           </div>
           <p className="text-xs text-[#9B9B9B]">
-            Threshold: <span className="font-medium text-[#6B6B6B]">{fmtKg(item.lowStockAlertKg!).value} {fmtKg(item.lowStockAlertKg!).unit}</span>
+            Min: <span className="font-medium text-[#6B6B6B]">{fmtKg(item.lowStockAlertKg!).value} {fmtKg(item.lowStockAlertKg!).unit}</span>
           </p>
         </div>
+      ) : (
+        <p className="text-xs text-[#9B9B9B] mt-auto">No threshold set</p>
       )}
     </div>
   );
@@ -181,22 +185,24 @@ function CategorySection({ category, items }: { category: string; items: Invento
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#F0F0F0]">
         <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-[#6B6B6B]" aria-hidden="true" />
-          <h2 className="text-sm font-bold text-[#1D1D1D]">{cat.label}</h2>
-          <span className="text-xs text-[#9B9B9B]">{items.length} item{items.length !== 1 ? "s" : ""}</span>
+          <div className="p-1.5 rounded-lg bg-[#F3F3F3]">
+            <Icon className="h-3.5 w-3.5 text-[#6B6B6B]" aria-hidden="true" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-[#1D1D1D] leading-none">{cat.label}</h2>
+            <p className="text-xs text-[#9B9B9B] mt-0.5">{items.length} item{items.length !== 1 ? "s" : ""} · {tv} {tu} total</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {alertCount > 0 && (
-            <span className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-full px-2.5 py-0.5">
-              {alertCount} low stock
-            </span>
-          )}
-          <span className="text-xs font-bold text-[#1D1D1D]">{tv} {tu}</span>
-        </div>
+        {alertCount > 0 && (
+          <span className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-full px-2.5 py-1 flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+            {alertCount} low
+          </span>
+        )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         {items.map(item => <StockCard key={item.id} item={item} />)}
       </div>
     </section>
@@ -402,7 +408,7 @@ export default function InventoryPage() {
           )}
 
           {/* Category sections */}
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {grouped.map(({ category, items: catItems }) => (
               <CategorySection key={category} category={category} items={catItems} />
             ))}
