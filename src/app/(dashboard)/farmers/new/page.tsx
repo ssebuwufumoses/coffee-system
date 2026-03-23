@@ -340,7 +340,7 @@ export default function NewFarmerPage() {
 
         {/* EUDR GPS Coordinates */}
         <div className="space-y-3 rounded-xl border-2 border-dashed border-primary/20 bg-primary/4 p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <Label className="text-primary font-semibold flex items-center gap-1.5">
                 <MapPin className="h-4 w-4" />
@@ -357,7 +357,7 @@ export default function NewFarmerPage() {
               size="sm"
               onClick={detectGPS}
               disabled={gpsLoading}
-              className="border-primary/30 text-primary hover:bg-primary/5 flex-shrink-0 ml-3"
+              className="border-primary/30 text-primary hover:bg-primary/5 w-full sm:w-auto"
             >
               {gpsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <MapPin className="h-3.5 w-3.5 mr-1" />}
               {gpsLoading ? "Getting…" : "Use Device GPS"}

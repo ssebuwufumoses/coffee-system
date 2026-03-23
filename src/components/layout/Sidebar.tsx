@@ -39,7 +39,7 @@ export default function Sidebar({ role, open = false, onClose }: SidebarProps) {
         >
           <X className="w-5 h-5" />
         </button>
-        <SidebarContent pathname={pathname} navItems={navItems} />
+        <SidebarContent pathname={pathname} navItems={navItems} onNavClick={onClose} />
       </aside>
     </>
   );
@@ -48,9 +48,11 @@ export default function Sidebar({ role, open = false, onClose }: SidebarProps) {
 function SidebarContent({
   pathname,
   navItems,
+  onNavClick,
 }: {
   pathname: string;
   navItems: { href: string; label: string; icon: React.ElementType }[];
+  onNavClick?: () => void;
 }) {
   return (
     <>
@@ -81,6 +83,7 @@ function SidebarContent({
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  onClick={onNavClick}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                     isActive
