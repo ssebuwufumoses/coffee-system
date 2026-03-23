@@ -1,0 +1,10 @@
+{
+  "name": "Victory Coffee Factory",
+  "short_name": "VCF",
+  "description": "Victory Coffee Factory Management System",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#FEF5F2",
+  "theme_color": "#240C64",
+  "icons": []
+}

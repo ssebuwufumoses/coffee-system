@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \":*)",
+      "Bash(npx tsc:*)",
+      "Bash(/tmp/accessibility_audit.txt:*)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

@@ -1,0 +1,541 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================================
+// ENUMS
+// =====================================================================
+
+enum Role {
+  ADMIN
+  OPERATOR
+  STORE_MANAGER
+  SALES_FINANCE
+}
+
+enum PaymentPreference {
+  CASH
+  MOBILE_MONEY
+  BANK
+  CHEQUE
+}
+
+enum InventoryCategory {
+  RAW_COFFEE
+  PROCESSED_BEANS
+  HUSKS
+  PACKAGING
+  OTHER
+}
+
+enum MovementDirection {
+  IN
+  OUT
+}
+
+enum MovementType {
+  INTAKE
+  MILLING_INPUT
+  MILLING_OUTPUT_BEANS
+  MILLING_OUTPUT_HUSKS
+  HUSK_ISSUANCE
+  SALE_DISPATCH
+  ADJUSTMENT
+}
+
+enum MillingStatus {
+  QUEUED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum MillingBatchType {
+  INDIVIDUAL
+  GROUP
+}
+
+enum BuyerType {
+  LOCAL_TRADER
+  EXPORTER
+}
+
+enum SaleOrderStatus {
+  DRAFT
+  CONFIRMED
+  DISPATCHED
+  DELIVERED
+  INVOICED
+  PAID
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  PENDING
+  IN_PROGRESS
+  MILLED
+}
+
+enum UcdaGrade {
+  SCREEN_18
+  SCREEN_15
+  SCREEN_12
+  FAQ
+  KIBOKO
+  OTHER
+}
+
+enum InvoicePaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  FULLY_PAID
+}
+
+enum PaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CHEQUE
+}
+
+// =====================================================================
+// DOMAIN 1: USERS & CONFIGURATION
+// =====================================================================
+
+model User {
+  id           String   @id @default(uuid())
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(150)
+  passwordHash String   @map("password_hash")
+  role         Role
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  farmersCreated        Farmer[]            @relation("FarmerCreatedBy")
+  deliveriesRecorded    Delivery[]          @relation("DeliveryRecordedBy")
+  huskIssuances         HuskIssuance[]      @relation("HuskIssuedBy")
+  farmerPayments        FarmerPayment[]     @relation("FarmerPaymentRecordedBy")
+  millingBatchesCreated MillingBatch[]      @relation("MillingCreatedBy")
+  saleOrdersCreated     SaleOrder[]         @relation("SaleOrderCreatedBy")
+  saleOrdersApproved    SaleOrder[]         @relation("SaleOrderApprovedBy")
+  dispatches            Dispatch[]          @relation("DispatchedBy")
+  invoicesCreated       Invoice[]           @relation("InvoiceCreatedBy")
+  buyerPaymentsRecorded BuyerPayment[]      @relation("BuyerPaymentRecordedBy")
+  expensesRecorded      Expense[]           @relation("ExpenseRecordedBy")
+  inventoryMovements    InventoryMovement[] @relation("MovementRecordedBy")
+  buyersCreated         Buyer[]             @relation("BuyerCreatedBy")
+  settingsUpdated       SystemSetting[]     @relation("SettingUpdatedBy")
+  pricesSet             CoffeePrice[]       @relation("PriceSetBy")
+  auditLogs             AuditLog[]          @relation("AuditUser")
+
+  @@map("users")
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique @db.VarChar(100)
+  value       String
+  description String?
+  updatedById String?  @map("updated_by")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  updatedBy User? @relation("SettingUpdatedBy", fields: [updatedById], references: [id])
+
+  @@map("system_settings")
+}
+
+// =====================================================================
+// DOMAIN 2: COFFEE VARIETIES (Admin-configurable, not hard-coded)
+// =====================================================================
+
+model CoffeeVariety {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(100)
+  code        String   @unique @db.VarChar(20)
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relations
+  farmers        Farmer[]
+  deliveries     Delivery[]
+  inventoryItems InventoryItem[]
+  millingBatches MillingBatch[]
+  saleOrders     SaleOrder[]
+  coffeePrices   CoffeePrice[]
+
+  @@map("coffee_varieties")
+}
+
+// =====================================================================
+// DOMAIN 3: FARMER MANAGEMENT
+// =====================================================================
+
+model Farmer {
+  id                String            @id @default(uuid())
+  farmerCode        String            @unique @map("farmer_code") @db.VarChar(20)
+  name              String            @db.VarChar(100)
+  phone             String            @db.VarChar(20)
+  location          String            @db.VarChar(150)
+  // EUDR compliance — GPS coordinates required for EU export
+  latitude          Float?            @map("latitude")
+  longitude         Float?            @map("longitude")
+  landBoundary      String?           @map("land_boundary") @db.Text
+  coffeeVarietyId   String            @map("coffee_variety_id")
+  paymentPreference PaymentPreference @map("payment_preference")
+  // Mobile Money payment details
+  mobileMoneyNetwork String?          @map("mobile_money_network") @db.VarChar(10)
+  mobileMoneyNumber  String?          @map("mobile_money_number") @db.VarChar(20)
+  // Bank payment details
+  bankName          String?           @map("bank_name") @db.VarChar(100)
+  bankBranch        String?           @map("bank_branch") @db.VarChar(100)
+  bankAccountNumber String?           @map("bank_account_number") @db.VarChar(50)
+  bankAccountName   String?           @map("bank_account_name") @db.VarChar(100)
+  isActive          Boolean           @default(true) @map("is_active")
+  createdById       String            @map("created_by")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  coffeeVariety      CoffeeVariety       @relation(fields: [coffeeVarietyId], references: [id])
+  createdBy          User                @relation("FarmerCreatedBy", fields: [createdById], references: [id])
+  deliveries         Delivery[]
+  huskIssuances      HuskIssuance[]
+  payments           FarmerPayment[]
+  millingBatchOwners MillingBatchOwner[]
+
+  @@map("farmers")
+}
+
+model Delivery {
+  id                 String     @id @default(uuid())
+  farmerId           String     @map("farmer_id")
+  coffeeVarietyId    String     @map("coffee_variety_id")
+  deliveryDate       DateTime   @map("delivery_date") @db.Date
+  weightKg           Decimal    @map("weight_kg") @db.Decimal(10, 2)
+  moistureContentPct Decimal?   @map("moisture_content_pct") @db.Decimal(5, 2)
+  foreignMatterPct   Decimal?   @map("foreign_matter_pct") @db.Decimal(5, 2)
+  // UCDA quality grade
+  ucdaGrade          UcdaGrade?     @map("ucda_grade")
+  status             DeliveryStatus @default(PENDING)
+  notes              String?
+  recordedById       String         @map("recorded_by")
+  createdAt          DateTime       @default(now()) @map("created_at")
+
+  // Relations
+  farmer             Farmer              @relation(fields: [farmerId], references: [id])
+  coffeeVariety      CoffeeVariety       @relation(fields: [coffeeVarietyId], references: [id])
+  recordedBy         User                @relation("DeliveryRecordedBy", fields: [recordedById], references: [id])
+  farmerPayments     FarmerPayment[]
+  inventoryMovements InventoryMovement[]
+
+  @@map("deliveries")
+}
+
+model HuskIssuance {
+  id           String   @id @default(uuid())
+  farmerId     String   @map("farmer_id")
+  bagsIssued   Int      @map("bags_issued")
+  kgEquivalent Decimal  @map("kg_equivalent") @db.Decimal(10, 2)
+  issuedDate   DateTime @map("issued_date") @db.Date
+  issuedById   String   @map("issued_by")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  farmer     Farmer              @relation(fields: [farmerId], references: [id])
+  issuedBy   User                @relation("HuskIssuedBy", fields: [issuedById], references: [id])
+  movements  InventoryMovement[]
+
+  @@map("husk_issuances")
+}
+
+// Farmer payments — deliveryId nullable supports both per-delivery and lump-sum
+model FarmerPayment {
+  id              String        @id @default(uuid())
+  farmerId        String        @map("farmer_id")
+  deliveryId      String?       @map("delivery_id")
+  amount          Decimal       @db.Decimal(15, 2)
+  paymentDate     DateTime      @map("payment_date") @db.Date
+  paymentMethod   PaymentMethod @map("payment_method")
+  referenceNumber String?       @map("reference_number") @db.VarChar(100)
+  notes           String?
+  recordedById    String        @map("recorded_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  farmer     Farmer    @relation(fields: [farmerId], references: [id])
+  delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+  recordedBy User      @relation("FarmerPaymentRecordedBy", fields: [recordedById], references: [id])
+
+  @@map("farmer_payments")
+}
+
+// =====================================================================
+// DOMAIN 4: INVENTORY (Central Ledger)
+// =====================================================================
+
+model InventoryItem {
+  id              String            @id @default(uuid())
+  name            String            @db.VarChar(100)
+  category        InventoryCategory
+  coffeeVarietyId String?           @map("coffee_variety_id")
+  currentStockKg  Decimal           @default(0) @map("current_stock_kg") @db.Decimal(15, 2)
+  lowStockAlertKg Decimal?          @map("low_stock_alert_kg") @db.Decimal(10, 2)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  coffeeVariety CoffeeVariety?      @relation(fields: [coffeeVarietyId], references: [id])
+  movements     InventoryMovement[]
+
+  @@map("inventory_items")
+}
+
+// Every single stock change is recorded here — the full audit trail
+model InventoryMovement {
+  id              String            @id @default(uuid())
+  inventoryItemId String            @map("inventory_item_id")
+  movementType    MovementType      @map("movement_type")
+  direction       MovementDirection
+  quantityKg      Decimal           @map("quantity_kg") @db.Decimal(10, 2)
+  balanceAfterKg  Decimal           @map("balance_after_kg") @db.Decimal(15, 2)
+  notes           String?
+  recordedById    String            @map("recorded_by")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  // Nullable FK references — only one is populated per row
+  deliveryId     String? @map("delivery_id")
+  millingBatchId String? @map("milling_batch_id")
+  huskIssuanceId String? @map("husk_issuance_id")
+  dispatchId     String? @map("dispatch_id")
+
+  // Relations
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  recordedBy    User          @relation("MovementRecordedBy", fields: [recordedById], references: [id])
+  delivery      Delivery?     @relation(fields: [deliveryId], references: [id])
+  millingBatch  MillingBatch? @relation(fields: [millingBatchId], references: [id])
+  huskIssuance  HuskIssuance? @relation(fields: [huskIssuanceId], references: [id])
+  dispatch      Dispatch?     @relation(fields: [dispatchId], references: [id])
+
+  @@map("inventory_movements")
+}
+
+// =====================================================================
+// DOMAIN 5: MILLING & PROCESSING
+// =====================================================================
+
+model MillingBatch {
+  id                String           @id @default(uuid())
+  batchNumber       String           @unique @map("batch_number") @db.VarChar(20)
+  batchType         MillingBatchType @default(INDIVIDUAL) @map("batch_type")
+  coffeeVarietyId   String           @map("coffee_variety_id")
+  status            MillingStatus    @default(QUEUED)
+  inputRawKg        Decimal          @map("input_raw_kg") @db.Decimal(10, 2)
+  outputBeansKg     Decimal?         @map("output_beans_kg") @db.Decimal(10, 2)
+  outputHusksKg     Decimal?         @map("output_husks_kg") @db.Decimal(10, 2)
+  // Auto-calculated: inputRawKg - outputBeansKg - outputHusksKg
+  moistureLossKg    Decimal?         @map("moisture_loss_kg") @db.Decimal(10, 2)
+  // Auto-calculated: (outputBeansKg / inputRawKg) * 100
+  conversionRatePct Decimal?         @map("conversion_rate_pct") @db.Decimal(5, 2)
+  milledDate        DateTime?        @map("milled_date") @db.Date
+  notes             String?
+  createdById       String           @map("created_by")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  coffeeVariety      CoffeeVariety       @relation(fields: [coffeeVarietyId], references: [id])
+  createdBy          User                @relation("MillingCreatedBy", fields: [createdById], references: [id])
+  inventoryMovements InventoryMovement[]
+  owners             MillingBatchOwner[]
+
+  @@map("milling_batches")
+}
+
+// Tracks which farmer(s) own the coffee in a milling batch and their proportional outputs
+model MillingBatchOwner {
+  id              String   @id @default(uuid())
+  millingBatchId  String   @map("milling_batch_id")
+  farmerId        String   @map("farmer_id")
+  inputKg         Decimal  @map("input_kg") @db.Decimal(10, 2)
+  // Filled in when batch is completed — proportional share of total output
+  outputBeansKg   Decimal? @map("output_beans_kg") @db.Decimal(10, 2)
+  outputHusksKg   Decimal? @map("output_husks_kg") @db.Decimal(10, 2)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  millingBatch MillingBatch @relation(fields: [millingBatchId], references: [id])
+  farmer       Farmer       @relation(fields: [farmerId], references: [id])
+
+  @@map("milling_batch_owners")
+}
+
+// =====================================================================
+// DOMAIN 6: SALES PIPELINE
+// =====================================================================
+
+model Buyer {
+  id          String    @id @default(uuid())
+  companyName String    @map("company_name") @db.VarChar(150)
+  contactName String    @map("contact_name") @db.VarChar(100)
+  phone       String    @db.VarChar(20)
+  email       String?   @db.VarChar(150)
+  location    String    @db.VarChar(150)
+  buyerType   BuyerType @map("buyer_type")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdById String    @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  createdBy  User        @relation("BuyerCreatedBy", fields: [createdById], references: [id])
+  saleOrders SaleOrder[]
+
+  @@map("buyers")
+}
+
+// Price history — always look up the current price at time of order
+model CoffeePrice {
+  id              String        @id @default(uuid())
+  coffeeVarietyId String        @map("coffee_variety_id")
+  pricePerKgUgx   Decimal       @map("price_per_kg_ugx") @db.Decimal(12, 2)
+  effectiveDate   DateTime      @map("effective_date") @db.Date
+  setById         String        @map("set_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  coffeeVariety CoffeeVariety @relation(fields: [coffeeVarietyId], references: [id])
+  setBy         User          @relation("PriceSetBy", fields: [setById], references: [id])
+
+  @@map("coffee_prices")
+}
+
+model SaleOrder {
+  id              String          @id @default(uuid())
+  orderNumber     String          @unique @map("order_number") @db.VarChar(20)
+  buyerId         String          @map("buyer_id")
+  coffeeVarietyId String          @map("coffee_variety_id")
+  quantityKg      Decimal         @map("quantity_kg") @db.Decimal(10, 2)
+  pricePerKgUgx   Decimal         @map("price_per_kg_ugx") @db.Decimal(12, 2)
+  totalAmountUgx  Decimal         @map("total_amount_ugx") @db.Decimal(15, 2)
+  status          SaleOrderStatus @default(DRAFT)
+  notes           String?
+  createdById     String          @map("created_by")
+  approvedById    String?         @map("approved_by")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  buyer         Buyer         @relation(fields: [buyerId], references: [id])
+  coffeeVariety CoffeeVariety @relation(fields: [coffeeVarietyId], references: [id])
+  createdBy     User          @relation("SaleOrderCreatedBy", fields: [createdById], references: [id])
+  approvedBy    User?         @relation("SaleOrderApprovedBy", fields: [approvedById], references: [id])
+  dispatches    Dispatch[]
+  invoices      Invoice[]
+
+  @@map("sale_orders")
+}
+
+// Multiple dispatches per order (partial loads on different days)
+model Dispatch {
+  id                String   @id @default(uuid())
+  saleOrderId       String   @map("sale_order_id")
+  gatePassNumber    String   @unique @map("gate_pass_number") @db.VarChar(20)
+  dispatchedKg      Decimal  @map("dispatched_kg") @db.Decimal(10, 2)
+  dispatchDate      DateTime @map("dispatch_date")
+  truckRegistration String?  @map("truck_registration") @db.VarChar(20)
+  driverName        String?  @map("driver_name") @db.VarChar(100)
+  driverPhone       String?  @map("driver_phone") @db.VarChar(20)
+  dispatchedById    String   @map("dispatched_by")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  saleOrder          SaleOrder           @relation(fields: [saleOrderId], references: [id])
+  dispatchedBy       User                @relation("DispatchedBy", fields: [dispatchedById], references: [id])
+  inventoryMovements InventoryMovement[]
+
+  @@map("dispatches")
+}
+
+model Invoice {
+  id            String               @id @default(uuid())
+  invoiceNumber String               @unique @map("invoice_number") @db.VarChar(20)
+  saleOrderId   String               @map("sale_order_id")
+  amountUgx     Decimal              @map("amount_ugx") @db.Decimal(15, 2)
+  dueDate       DateTime             @map("due_date") @db.Date
+  paymentStatus InvoicePaymentStatus @default(UNPAID) @map("payment_status")
+  createdById   String               @map("created_by")
+  createdAt     DateTime             @default(now()) @map("created_at")
+  updatedAt     DateTime             @updatedAt @map("updated_at")
+
+  // Relations
+  saleOrder SaleOrder      @relation(fields: [saleOrderId], references: [id])
+  createdBy User           @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  payments  BuyerPayment[]
+
+  @@map("invoices")
+}
+
+model BuyerPayment {
+  id              String        @id @default(uuid())
+  invoiceId       String        @map("invoice_id")
+  amountPaidUgx   Decimal       @map("amount_paid_ugx") @db.Decimal(15, 2)
+  paymentDate     DateTime      @map("payment_date") @db.Date
+  paymentMethod   PaymentMethod @map("payment_method")
+  referenceNumber String?       @map("reference_number") @db.VarChar(100)
+  recordedById    String        @map("recorded_by")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  invoice    Invoice @relation(fields: [invoiceId], references: [id])
+  recordedBy User    @relation("BuyerPaymentRecordedBy", fields: [recordedById], references: [id])
+
+  @@map("buyer_payments")
+}
+
+// =====================================================================
+// DOMAIN 7: FINANCE
+// =====================================================================
+
+model Expense {
+  id          String   @id @default(uuid())
+  category    String   @db.VarChar(100)
+  amountUgx   Decimal  @map("amount_ugx") @db.Decimal(15, 2)
+  expenseDate DateTime @map("expense_date") @db.Date
+  description String?
+  recordedById String  @map("recorded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  recordedBy User @relation("ExpenseRecordedBy", fields: [recordedById], references: [id])
+
+  @@map("expenses")
+}
+
+// =====================================================================
+// DOMAIN 8: AUDIT LOG
+// =====================================================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  action     String   @db.VarChar(100)
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String   @map("entity_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  // true for deletions and price modifications — shown flagged in admin
+  isFlagged  Boolean  @default(false) @map("is_flagged")
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation("AuditUser", fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
