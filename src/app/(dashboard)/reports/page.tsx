@@ -706,11 +706,25 @@ export default function ReportsPage() {
       </div>
 
       {/* Tabs + Date filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-        <div className="flex gap-1 bg-[#F6F6F6] rounded-lg p-1 overflow-x-auto max-w-full">
+      <div className="flex flex-col gap-3">
+        {/* Mobile: native select picker */}
+        <div className="sm:hidden">
+          <select
+            value={tab}
+            onChange={e => setTab(e.target.value)}
+            className="w-full rounded-lg border border-[#E8E8E8] bg-white px-3 py-2.5 text-sm font-semibold text-[#240C64] focus:outline-none focus:ring-2 focus:ring-[#240C64]"
+          >
+            {TABS.map(t => (
+              <option key={t.key} value={t.key}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Desktop: tab bar */}
+        <div className="hidden sm:flex gap-1 bg-[#F6F6F6] rounded-lg p-1 w-fit">
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap shrink-0 ${
+              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap ${
                 tab === t.key ? "bg-white text-[#240C64] shadow-sm" : "text-[#6B6B6B] hover:text-[#1D1D1D]"
               }`}>
               <t.Icon className="h-3.5 w-3.5" />
@@ -718,6 +732,7 @@ export default function ReportsPage() {
             </button>
           ))}
         </div>
+
         <DateFilter from={from} to={to} onChange={(f, t) => { setFrom(f); setTo(t); }} />
       </div>
 
