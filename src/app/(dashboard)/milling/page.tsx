@@ -149,100 +149,95 @@ export default function MillingPage() {
 
       {/* Batches table */}
       <div className="bg-white rounded-xl border border-surface-secondary overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-secondary bg-surface-primary">
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Batch</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Date</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Coffee</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Owner(s)</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Status</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Input (kg)</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Beans Out</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Rate %</th>
-                <th className="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={9} className="text-center py-12 text-gray-400">Loading batches...</td></tr>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-surface-secondary bg-surface-primary">
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Batch</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Owner(s)</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden md:table-cell">Coffee</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Status</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Input (kg)</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden md:table-cell">Beans Out</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden lg:table-cell">Rate %</th>
+              <th className="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan={8} className="text-center py-12 text-gray-400">Loading batches...</td></tr>
 
-              ) : batches.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-12">
-                    <Factory className="h-10 w-10 text-gray-200 mx-auto mb-3" />
-                    <p className="text-gray-400 font-medium">No milling batches yet</p>
-                    <p className="text-gray-300 text-xs mt-1">Create the first batch to start processing</p>
+            ) : batches.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center py-12">
+                  <Factory className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                  <p className="text-gray-400 font-medium">No milling batches yet</p>
+                  <p className="text-gray-300 text-xs mt-1">Create the first batch to start processing</p>
+                </td>
+              </tr>
+            ) : (
+              batches.map(b => (
+                <tr key={b.id} className="border-b border-surface-secondary last:border-0 hover:bg-surface-primary/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <p className="font-mono text-sm font-medium text-primary">{b.batchNumber}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {new Date(b.milledDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
+                    </p>
+                  </td>
+                  <td className="px-4 py-3 hidden sm:table-cell">
+                    {b.batchType === "GROUP" ? (
+                      <div>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <Users className="h-3 w-3 text-primary" />
+                          <span className="text-xs font-semibold text-primary">{b.owners.length} members</span>
+                        </div>
+                        <p className="text-xs text-gray-400 truncate max-w-[160px]">
+                          {b.owners.map(o => o.farmer.name).join(", ")}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <User className="h-3 w-3 text-gray-400" />
+                        <div>
+                          <p className="text-sm font-medium text-deepest">{b.owners[0]?.farmer.name ?? "—"}</p>
+                          <p className="text-xs text-gray-400">{b.owners[0]?.farmer.farmerCode}</p>
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <Badge variant="muted">{b.coffeeVariety.name}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[b.status]}`}>
+                      {STATUS_LABELS[b.status]}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right font-semibold text-deepest">
+                    {parseFloat(b.inputRawKg).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-600 hidden md:table-cell">
+                    {b.outputBeansKg ? parseFloat(b.outputBeansKg).toLocaleString() : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right hidden lg:table-cell">
+                    {b.conversionRatePct ? (
+                      <span className="flex items-center justify-end gap-1">
+                        <TrendingUp className="h-3 w-3 text-success" />
+                        <span className="text-success font-medium">{parseFloat(b.conversionRatePct).toFixed(1)}%</span>
+                      </span>
+                    ) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/milling/${b.id}`}>
+                      <Button variant="outline" size="sm">
+                        {b.status === "COMPLETED" ? "View" : "Complete"}
+                      </Button>
+                    </Link>
                   </td>
                 </tr>
-              ) : (
-                batches.map(b => (
-                  <tr key={b.id} className="border-b border-surface-secondary last:border-0 hover:bg-surface-primary/50 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="font-mono text-sm font-medium text-primary">{b.batchNumber}</p>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 text-sm">
-                      {new Date(b.milledDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant="muted">{b.coffeeVariety.name}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      {b.batchType === "GROUP" ? (
-                        <div>
-                          <div className="flex items-center gap-1 mb-0.5">
-                            <Users className="h-3 w-3 text-primary" />
-                            <span className="text-xs font-semibold text-primary">{b.owners.length} members</span>
-                          </div>
-                          <p className="text-xs text-gray-400 truncate max-w-[160px]">
-                            {b.owners.map(o => o.farmer.name).join(", ")}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5">
-                          <User className="h-3 w-3 text-gray-400" />
-                          <div>
-                            <p className="text-sm font-medium text-deepest">
-                              {b.owners[0]?.farmer.name ?? "—"}
-                            </p>
-                            <p className="text-xs text-gray-400">{b.owners[0]?.farmer.farmerCode}</p>
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[b.status]}`}>
-                        {STATUS_LABELS[b.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-deepest">
-                      {parseFloat(b.inputRawKg).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-right text-gray-600">
-                      {b.outputBeansKg ? parseFloat(b.outputBeansKg).toLocaleString() : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {b.conversionRatePct ? (
-                        <span className="flex items-center justify-end gap-1">
-                          <TrendingUp className="h-3 w-3 text-success" />
-                          <span className="text-success font-medium">{parseFloat(b.conversionRatePct).toFixed(1)}%</span>
-                        </span>
-                      ) : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link href={`/milling/${b.id}`}>
-                        <Button variant="outline" size="sm">
-                          {b.status === "COMPLETED" ? "View" : "Complete"}
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
         {pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-surface-secondary">
             <p className="text-sm text-gray-500">Page {page} of {pages}</p>
