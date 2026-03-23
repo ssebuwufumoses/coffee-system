@@ -147,7 +147,7 @@ export default function MillingBatchDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 text-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-xs text-gray-400">Coffee Type</p>
             <p className="font-medium text-deepest">{batch.coffeeVariety.name}</p>
@@ -292,7 +292,7 @@ export default function MillingBatchDetailPage() {
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm">{errors.general}</div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="outputBeansKg">
                 <Coffee className="inline h-3.5 w-3.5 mr-1" />

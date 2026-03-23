@@ -297,7 +297,7 @@ export default function NewFarmerPage() {
               <Building2 className="h-4 w-4" />
               Bank Account Details
             </Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="bankName" className="text-xs">Bank Name *</Label>
                 <Input

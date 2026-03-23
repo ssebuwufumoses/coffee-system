@@ -480,7 +480,7 @@ export default function FarmerProfilePage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#1D1D1D] mb-1.5">Amount (UGX) *</label>
                   <input
@@ -501,7 +501,7 @@ export default function FarmerProfilePage() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#1D1D1D] mb-1.5">Payment Method *</label>
                   <select

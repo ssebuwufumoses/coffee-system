@@ -83,8 +83,7 @@ export default function DeliveriesPage() {
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-surface-secondary overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-secondary bg-surface-primary">
                 <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Date</th>
@@ -156,7 +155,6 @@ export default function DeliveriesPage() {
               )}
             </tbody>
           </table>
-        </div>
 
         {/* Pagination */}
         {pages > 1 && (

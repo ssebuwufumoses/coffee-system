@@ -105,7 +105,7 @@ export default function DeliveryReceiptPage() {
 
         <div className="p-6 space-y-6">
           {/* Farmer Info */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <p className="text-xs text-gray-400 uppercase tracking-wide flex items-center gap-1">
                 <User className="h-3 w-3" /> Farmer
@@ -132,7 +132,7 @@ export default function DeliveryReceiptPage() {
           <hr className="border-surface-secondary" />
 
           {/* Delivery Details */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide">Date</p>
               <p className="font-medium text-deepest mt-1">{formatDate(delivery.deliveryDate)}</p>
@@ -156,7 +156,7 @@ export default function DeliveryReceiptPage() {
 
           {/* Quality Metrics */}
           {(delivery.moistureContentPct || delivery.foreignMatterPct) && (
-            <div className="bg-surface-primary rounded-lg p-4 grid grid-cols-2 gap-4 text-sm">
+            <div className="bg-surface-primary rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               {delivery.moistureContentPct && (
                 <div>
                   <p className="text-gray-400 text-xs">Moisture Content</p>
@@ -184,9 +184,9 @@ export default function DeliveryReceiptPage() {
           {farmerStats && (
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">Farmer Totals (All Time)</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2">
                 <div className="bg-surface-primary rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-primary">{farmerStats.totalDeliveries}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-primary">{farmerStats.totalDeliveries}</p>
                   <p className="text-xs text-gray-400 mt-1">Total Deliveries</p>
                 </div>
                 <div className="bg-surface-primary rounded-lg p-3 text-center">

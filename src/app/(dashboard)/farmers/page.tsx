@@ -82,8 +82,8 @@ export default function FarmersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-surface-secondary overflow-x-auto">
-        <table className="w-full text-sm min-w-[600px]">
+      <div className="bg-white rounded-xl border border-surface-secondary overflow-hidden">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-surface-secondary bg-surface-primary">
               <th className="text-left px-4 py-3 font-semibold text-primary text-xs uppercase tracking-wide">Code</th>

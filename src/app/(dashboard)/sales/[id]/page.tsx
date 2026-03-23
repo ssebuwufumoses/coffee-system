@@ -464,7 +464,7 @@ export default function SaleOrderDetailPage() {
                 </span>
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
+            <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
               <div><p className="text-[#9B9B9B] text-xs">Invoice Amount</p><p className="font-bold text-[#1D1D1D]">{fmtUgx(invoice.amountUgx)}</p></div>
               <div><p className="text-[#9B9B9B] text-xs">Paid</p><p className="font-bold text-emerald-700">{fmtUgx(totalPaid)}</p></div>
               <div><p className="text-[#9B9B9B] text-xs">Outstanding</p><p className={`font-bold ${outstanding > 0 ? "text-red-700" : "text-emerald-700"}`}>{fmtUgx(outstanding)}</p></div>
@@ -547,7 +547,7 @@ export default function SaleOrderDetailPage() {
               {/* Payment details — shown when payment is made */}
               {confirmForm.paymentStatus !== "NONE" && (
                 <div className="space-y-3 border-t border-[#F0F0F0] pt-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <Field label="Payment Method" required>
                       <select value={confirmForm.paymentMethod} onChange={e => setConfirmForm(f => ({ ...f, paymentMethod: e.target.value }))} className={inputCls}>
                         <option value="CASH">Cash</option>
@@ -619,7 +619,7 @@ export default function SaleOrderDetailPage() {
               </p>
             </div>
             <form onSubmit={submitDispatch} className="px-5 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Quantity (kg)" required>
                   <input type="number" min="0.1" step="0.1" required value={dispatchForm.dispatchedKg}
                     onChange={e => setDispatchForm(f => ({ ...f, dispatchedKg: e.target.value }))} className={inputCls} />
@@ -629,7 +629,7 @@ export default function SaleOrderDetailPage() {
                     onChange={e => setDispatchForm(f => ({ ...f, dispatchDateTime: e.target.value }))} className={inputCls} />
                 </Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Truck Reg.">
                   <input type="text" placeholder="UAB 123X" value={dispatchForm.truckRegistration}
                     onChange={e => setDispatchForm(f => ({ ...f, truckRegistration: e.target.value }))} className={inputCls} />
@@ -688,7 +688,7 @@ export default function SaleOrderDetailPage() {
               <p className="text-xs text-[#9B9B9B] mt-0.5">Outstanding: {fmtUgx(outstanding)}</p>
             </div>
             <form onSubmit={submitPayment} className="px-5 py-4 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Amount (UGX)" required>
                   <input type="number" min="1" step="1" required value={paymentForm.amountPaidUgx}
                     onChange={e => setPaymentForm(f => ({ ...f, amountPaidUgx: e.target.value }))} className={inputCls} />
@@ -698,7 +698,7 @@ export default function SaleOrderDetailPage() {
                     onChange={e => setPaymentForm(f => ({ ...f, paymentDate: e.target.value }))} className={inputCls} />
                 </Field>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Method" required>
                   <select required value={paymentForm.paymentMethod} onChange={e => setPaymentForm(f => ({ ...f, paymentMethod: e.target.value }))} className={inputCls}>
                     <option value="CASH">Cash</option>
