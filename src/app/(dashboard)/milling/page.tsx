@@ -179,6 +179,20 @@ export default function MillingPage() {
                 <tr key={b.id} className="border-b border-surface-secondary last:border-0 hover:bg-surface-primary/50 transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-mono text-sm font-medium text-primary">{b.batchNumber}</p>
+                    {/* Owner sub-text — visible on mobile only */}
+                    <p className="text-xs text-gray-600 mt-0.5 sm:hidden flex items-center gap-1">
+                      {b.batchType === "GROUP" ? (
+                        <span className="flex items-center gap-1">
+                          <Users className="h-3 w-3 text-primary inline" />
+                          {b.owners.length} members
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3 text-gray-400 inline" />
+                          {b.owners[0]?.farmer.name ?? "—"}
+                        </span>
+                      )}
+                    </p>
                     <p className="text-xs text-gray-400 mt-0.5">
                       {new Date(b.milledDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
                     </p>
