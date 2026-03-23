@@ -24,6 +24,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -34,7 +35,9 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/dashboard";
+      // Small delay to ensure cookie is committed before navigation
+      await new Promise(r => setTimeout(r, 100));
+      window.location.replace("/dashboard");
     } catch {
       setError("Connection error. Please check your network and try again.");
     } finally {
