@@ -118,92 +118,96 @@ export default function HuskIssuancesPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-surface-secondary overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-secondary bg-surface-primary">
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Date</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Farmer</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Bags</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">KG Equivalent</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Issued By</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Notes</th>
-                <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Farmer Balance</th>
-                <th className="px-4 py-3" />
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-surface-secondary bg-surface-primary">
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Farmer</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Bags</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">KG</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Balance</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden md:table-cell">Issued By</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden lg:table-cell">Notes</th>
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-gray-400">Loading…</td>
               </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={8} className="text-center py-12 text-gray-400">Loading…</td>
-                </tr>
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="text-center py-12">
-                    <Leaf className="h-10 w-10 text-gray-200 mx-auto mb-3" />
-                    <p className="text-gray-400 font-medium">No husk issuances recorded yet</p>
-                    <p className="text-gray-300 text-xs mt-1">Issue husks from a farmer&apos;s profile page</p>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center py-12">
+                  <Leaf className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+                  <p className="text-gray-400 font-medium">No husk issuances recorded yet</p>
+                  <p className="text-gray-300 text-xs mt-1">Issue husks from a farmer&apos;s profile page</p>
+                </td>
+              </tr>
+            ) : (
+              filtered.map((i) => (
+                <tr key={i.id} className="border-b border-surface-secondary last:border-0 hover:bg-surface-primary/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <Link href={`/farmers/${i.farmer.id}`} className="group">
+                      <div className="font-medium text-primary group-hover:underline flex items-center gap-1">
+                        {i.farmer.name}
+                        <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {i.farmer.farmerCode}
+                        <span className="sm:hidden"> · {new Date(i.issuedDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                      </div>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <span className="font-bold text-deepest">{i.bagsIssued}</span>
+                    <div className="text-xs text-gray-400 hidden sm:block">
+                      {new Date(i.issuedDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right text-gray-500 hidden sm:table-cell">
+                    {Number(i.kgEquivalent).toLocaleString()} kg
+                  </td>
+                  <td className="px-4 py-3 text-right hidden sm:table-cell">
+                    {i.farmerHuskBalance ? (
+                      i.farmerHuskBalance.balance === 0 ? (
+                        <span className="inline-flex items-center text-xs font-semibold text-success bg-success/10 rounded-full px-2.5 py-1">
+                          ✓ Done
+                        </span>
+                      ) : (
+                        <div>
+                          <span className={`text-sm font-bold ${i.farmerHuskBalance.balance > 20 ? "text-warning" : "text-primary"}`}>
+                            {i.farmerHuskBalance.balance} bags
+                          </span>
+                          <div className="text-xs text-gray-400">remaining</div>
+                        </div>
+                      )
+                    ) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{i.issuedBy.name}</td>
+                  <td className="px-4 py-3 text-gray-400 max-w-[180px] truncate hidden lg:table-cell">{i.notes ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => openEdit(i)}
+                        className="p-1.5 rounded-lg text-[#6B6B6B] hover:text-[#1D1D1D] hover:bg-[#F6F6F6] transition-colors"
+                        title="Edit notes / date"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => { setDeleting(i); setDeleteError(""); }}
+                        className="p-1.5 rounded-lg text-[#6B6B6B] hover:text-red-600 hover:bg-red-50 transition-colors"
+                        title="Void issuance"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ) : (
-                filtered.map((i) => (
-                  <tr key={i.id} className="border-b border-surface-secondary last:border-0 hover:bg-surface-primary/50 transition-colors">
-                    <td className="px-4 py-3 text-gray-600">
-                      {new Date(i.issuedDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link href={`/farmers/${i.farmer.id}`} className="group">
-                        <div className="font-medium text-primary group-hover:underline flex items-center gap-1">
-                          {i.farmer.name}
-                          <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
-                        </div>
-                        <div className="text-xs text-gray-400">{i.farmer.farmerCode}</div>
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-deepest">{i.bagsIssued}</td>
-                    <td className="px-4 py-3 text-right text-gray-500">{Number(i.kgEquivalent).toLocaleString()} kg</td>
-                    <td className="px-4 py-3 text-gray-500">{i.issuedBy.name}</td>
-                    <td className="px-4 py-3 text-gray-400 max-w-[180px] truncate">{i.notes ?? "—"}</td>
-                    <td className="px-4 py-3 text-right">
-                      {i.farmerHuskBalance ? (
-                        i.farmerHuskBalance.balance === 0 ? (
-                          <span className="inline-flex items-center text-xs font-semibold text-success bg-success/10 rounded-full px-2.5 py-1">
-                            ✓ All Collected
-                          </span>
-                        ) : (
-                          <div>
-                            <span className={`text-sm font-bold ${i.farmerHuskBalance.balance > 20 ? "text-warning" : "text-primary"}`}>
-                              {i.farmerHuskBalance.balance} bags
-                            </span>
-                            <div className="text-xs text-gray-400">remaining</div>
-                          </div>
-                        )
-                      ) : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEdit(i)}
-                          className="p-1.5 rounded-lg text-[#6B6B6B] hover:text-[#1D1D1D] hover:bg-[#F6F6F6] transition-colors"
-                          title="Edit notes / date"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          onClick={() => { setDeleting(i); setDeleteError(""); }}
-                          className="p-1.5 rounded-lg text-[#6B6B6B] hover:text-red-600 hover:bg-red-50 transition-colors"
-                          title="Void issuance"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
 
         {pages > 1 && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-surface-secondary">
