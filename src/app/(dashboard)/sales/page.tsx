@@ -88,28 +88,47 @@ export default function SalesPage() {
         </div>
       </div>
 
-      {/* Status tabs */}
-      <div className="flex gap-1 overflow-x-auto pb-1">
-        {TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-              activeTab === tab
-                ? "bg-[#240C64] text-white"
-                : "bg-white border border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F6F6F6]"
-            }`}
+      {/* Status tabs — select on mobile, pills on desktop */}
+      <div>
+        {/* Mobile */}
+        <div className="sm:hidden">
+          <select
+            value={activeTab}
+            onChange={e => setActiveTab(e.target.value)}
+            className="w-full rounded-lg border border-[#E8E8E8] bg-white px-3 py-2.5 text-sm font-semibold text-[#240C64] focus:outline-none focus:ring-2 focus:ring-[#240C64]"
           >
-            {tab === "ALL" ? "All" : STATUS_CONFIG[tab]?.label}
-            {counts[tab] > 0 && (
-              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                activeTab === tab ? "bg-white/20 text-white" : "bg-[#F6F6F6] text-[#6B6B6B]"
-              }`}>
-                {counts[tab]}
-              </span>
-            )}
-          </button>
-        ))}
+            {TABS.map(tab => (
+              <option key={tab} value={tab}>
+                {tab === "ALL" ? "All" : STATUS_CONFIG[tab]?.label}
+                {counts[tab] > 0 ? ` (${counts[tab]})` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Desktop */}
+        <div className="hidden sm:flex gap-1 flex-wrap">
+          {TABS.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                activeTab === tab
+                  ? "bg-[#240C64] text-white"
+                  : "bg-white border border-[#E8E8E8] text-[#6B6B6B] hover:bg-[#F6F6F6]"
+              }`}
+            >
+              {tab === "ALL" ? "All" : STATUS_CONFIG[tab]?.label}
+              {counts[tab] > 0 && (
+                <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                  activeTab === tab ? "bg-white/20 text-white" : "bg-[#F6F6F6] text-[#6B6B6B]"
+                }`}>
+                  {counts[tab]}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table */}
