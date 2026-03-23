@@ -453,7 +453,11 @@ export default function InventoryPage() {
                         <ItemIcon className="h-3.5 w-3.5 flex-shrink-0 text-[#9B9B9B]" aria-hidden="true" />
                         <div>
                           <p className="font-medium text-[#1D1D1D]">{m.inventoryItem.name}</p>
-                          <p className="text-xs text-[#9B9B9B] sm:hidden">{fmtDate(m.createdAt)}</p>
+                          {/* Type + by — visible on mobile only */}
+                          <p className="text-xs text-[#9B9B9B] sm:hidden">
+                            {TX_LABELS[m.movementType] ?? m.movementType} · {m.recordedBy.name}
+                          </p>
+                          <p className="text-xs text-[#9B9B9B]">{fmtDate(m.createdAt)}</p>
                         </div>
                       </div>
                     </td>
@@ -477,6 +481,10 @@ export default function InventoryPage() {
                       <span className={`text-sm font-bold ${isIn ? "text-emerald-700" : "text-red-700"}`}>
                         {isIn ? "+" : "−"}{parseFloat(m.quantityKg).toLocaleString()}
                       </span>
+                      {/* Balance sub-text — visible on mobile only */}
+                      <p className="text-xs text-[#9B9B9B] sm:hidden mt-0.5">
+                        → {parseFloat(m.balanceAfterKg).toLocaleString()} kg
+                      </p>
                     </td>
                     <td className="px-4 py-3.5 text-right hidden md:table-cell">
                       <span className="text-sm font-semibold text-[#1D1D1D]">
