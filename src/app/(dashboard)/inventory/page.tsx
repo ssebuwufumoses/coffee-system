@@ -457,19 +457,22 @@ export default function InventoryPage() {
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2">
                         <ItemIcon className="h-3.5 w-3.5 flex-shrink-0 text-[#9B9B9B]" aria-hidden="true" />
-                        <div>
-                          <p className="font-medium text-[#1D1D1D]">{m.inventoryItem.name}</p>
-                          {/* Type + by — visible on mobile only */}
-                          <p className="text-xs text-[#9B9B9B] sm:hidden">
-                            {TX_LABELS[m.movementType] ?? m.movementType} · {m.recordedBy.name}
-                          </p>
-                          <p className="text-xs text-[#9B9B9B]">{fmtDate(m.createdAt)}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-[#1D1D1D] truncate">{m.inventoryItem.name}</p>
+                          {/* Type badge + recorded by — mobile only */}
+                          <div className="flex items-center gap-1.5 mt-0.5 sm:hidden flex-wrap">
+                            <span className="inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold bg-[#F0F0F0] text-[#3D3D3D]">
+                              {TX_LABELS[m.movementType] ?? m.movementType}
+                            </span>
+                            <span className="text-[10px] text-[#9B9B9B]">{m.recordedBy.name}</span>
+                          </div>
+                          <p className="text-xs text-[#9B9B9B] mt-0.5">{fmtDate(m.createdAt)} · {fmtTime(m.createdAt)}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3.5 text-[#6B6B6B] hidden sm:table-cell">
-                      <p>{TX_LABELS[m.movementType] ?? m.movementType}</p>
-                      <p className="text-xs text-[#9B9B9B]">{fmtDate(m.createdAt)}</p>
+                      <p className="text-sm">{TX_LABELS[m.movementType] ?? m.movementType}</p>
+                      <p className="text-xs text-[#9B9B9B] mt-0.5">{fmtDate(m.createdAt)}</p>
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
@@ -487,15 +490,19 @@ export default function InventoryPage() {
                       <span className={`text-sm font-bold ${isIn ? "text-emerald-700" : "text-red-700"}`}>
                         {isIn ? "+" : "−"}{parseFloat(m.quantityKg).toLocaleString()}
                       </span>
-                      {/* Balance sub-text — visible on mobile only */}
-                      <p className="text-xs text-[#9B9B9B] sm:hidden mt-0.5">
-                        → {parseFloat(m.balanceAfterKg).toLocaleString()} kg
-                      </p>
+                      {/* Balance after — mobile only */}
+                      <div className="sm:hidden mt-1 flex items-center justify-end gap-1">
+                        <span className="text-[10px] text-[#9B9B9B]">bal</span>
+                        <span className="text-xs font-semibold text-[#1D1D1D]">
+                          {parseFloat(m.balanceAfterKg).toLocaleString()} kg
+                        </span>
+                      </div>
                     </td>
                     <td className="px-4 py-3.5 text-right hidden md:table-cell">
                       <span className="text-sm font-semibold text-[#1D1D1D]">
                         {parseFloat(m.balanceAfterKg).toLocaleString()}
                       </span>
+                      <p className="text-xs text-[#9B9B9B] mt-0.5">kg</p>
                     </td>
                     <td className="px-5 py-3.5 text-[#6B6B6B] text-sm hidden lg:table-cell">{m.recordedBy.name}</td>
                   </tr>
