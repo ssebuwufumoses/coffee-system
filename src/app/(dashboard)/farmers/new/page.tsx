@@ -255,7 +255,7 @@ export default function NewFarmerPage() {
                         : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                     }`}
                   >
-                    {network === "MTN" ? "📱 MTN Mobile Money" : "📱 Airtel Money"}
+                    {network === "MTN" ? "MTN" : "Airtel"}
                   </button>
                 ))}
               </div>
