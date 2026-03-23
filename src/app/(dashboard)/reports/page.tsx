@@ -707,27 +707,14 @@ export default function ReportsPage() {
 
       {/* Tabs + Date filter */}
       <div className="flex flex-col gap-3">
-        {/* Mobile: native select picker */}
-        <div className="sm:hidden">
-          <select
-            value={tab}
-            onChange={e => setTab(e.target.value)}
-            className="w-full rounded-lg border border-[#E8E8E8] bg-white px-3 py-2.5 text-sm font-semibold text-[#240C64] focus:outline-none focus:ring-2 focus:ring-[#240C64]"
-          >
-            {TABS.map(t => (
-              <option key={t.key} value={t.key}>{t.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Desktop: tab bar */}
-        <div className="hidden sm:flex gap-1 bg-[#F6F6F6] rounded-lg p-1 w-fit">
+        {/* Tab bar — wraps to multiple rows on mobile */}
+        <div className="flex flex-wrap gap-1 bg-[#F6F6F6] rounded-lg p-1">
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap ${
                 tab === t.key ? "bg-white text-[#240C64] shadow-sm" : "text-[#6B6B6B] hover:text-[#1D1D1D]"
               }`}>
-              <t.Icon className="h-3.5 w-3.5" />
+              <t.Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               {t.label}
             </button>
           ))}
