@@ -1,49 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Eye, EyeOff, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginAction } from "./actions";
+import { useState } from "react";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" className="w-full h-11 text-base" loading={pending}>
+      {pending ? "Signing in..." : "Sign in"}
+    </Button>
+  );
+}
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [error, formAction] = useActionState(loginAction, null);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Login failed. Please try again.");
-        return;
-      }
-
-      // Small delay to ensure cookie is committed before navigation
-      await new Promise(r => setTimeout(r, 100));
-      window.location.replace("/dashboard");
-    } catch {
-      setError("Connection error. Please check your network and try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-surface-primary px-4">
@@ -77,7 +54,7 @@ export default function LoginPage() {
               <p className="text-sm text-gray-500 mt-1">Enter your credentials to access the system</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form action={formAction} className="space-y-5">
               {/* Error message */}
               {error && (
                 <div className="rounded-lg bg-warning/10 border border-warning/20 px-4 py-3">
@@ -90,10 +67,9 @@ export default function LoginPage() {
                 <Label htmlFor="email">Email address</Label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="you@victorycoffee.ug"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
                   autoFocus
@@ -106,10 +82,9 @@ export default function LoginPage() {
                 <div className="relative">
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     required
                     autoComplete="current-password"
                     className="pr-10"
@@ -126,13 +101,7 @@ export default function LoginPage() {
               </div>
 
               {/* Submit */}
-              <Button
-                type="submit"
-                className="w-full h-11 text-base"
-                loading={loading}
-              >
-                {loading ? "Signing in..." : "Sign in"}
-              </Button>
+              <SubmitButton />
             </form>
           </div>
         </div>
