@@ -150,7 +150,7 @@ export default function FarmerProfilePage() {
         title={farmer.name}
         description={`${farmer.farmerCode} · Registered by ${farmer.createdBy.name}`}
         action={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Link href="/farmers">
               <Button variant="outline" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-1" />Back
@@ -165,11 +165,13 @@ export default function FarmerProfilePage() {
               setPaymentForm(f => ({ ...f, paymentMethod: preferenceToMethod[farmer.paymentPreference] ?? "CASH" }));
               setShowPaymentModal(true);
             }}>
-              <Banknote className="h-4 w-4 mr-1" />Record Payment
+              <Banknote className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Record </span>Payment
             </Button>
             {stats.husksBalanceBags > 0 && (
               <Button size="sm" onClick={() => setShowIssueModal(true)}>
-                <Leaf className="h-4 w-4 mr-1" />Issue Husks
+                <Leaf className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Issue </span>Husks
               </Button>
             )}
           </div>
@@ -278,10 +280,10 @@ export default function FarmerProfilePage() {
           <thead>
             <tr className="border-b border-surface-secondary bg-surface-primary">
               <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Date</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Type</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden sm:table-cell">Type</th>
               <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Weight (kg)</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Moisture %</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Recorded by</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden md:table-cell">Moisture %</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden lg:table-cell">Recorded by</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-secondary">
@@ -296,17 +298,24 @@ export default function FarmerProfilePage() {
                     {new Date(d.deliveryDate).toLocaleDateString("en-UG", {
                       day: "numeric", month: "short", year: "numeric",
                     })}
+                    <div className="sm:hidden mt-0.5 flex flex-wrap items-center gap-1">
+                      <Badge variant="default" className="text-[10px]">{d.coffeeVariety.name}</Badge>
+                      {d.moistureContentPct != null && (
+                        <span className="text-[10px] text-gray-400">{d.moistureContentPct}% moisture</span>
+                      )}
+                      <span className="text-[10px] text-gray-400 hidden xs:inline">· {d.recordedBy.name}</span>
+                    </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 hidden sm:table-cell">
                     <Badge variant="default">{d.coffeeVariety.name}</Badge>
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-deepest">
                     {Number(d.weightKg).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-500">
+                  <td className="px-4 py-3 text-right text-gray-500 hidden md:table-cell">
                     {d.moistureContentPct != null ? `${d.moistureContentPct}%` : "—"}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{d.recordedBy.name}</td>
+                  <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{d.recordedBy.name}</td>
                 </tr>
               ))
             )}
@@ -325,9 +334,9 @@ export default function FarmerProfilePage() {
             <tr className="border-b border-surface-secondary bg-surface-primary">
               <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Date</th>
               <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Bags</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">kg Equivalent</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Issued by</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Notes</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden sm:table-cell">kg Equivalent</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden md:table-cell">Issued by</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden lg:table-cell">Notes</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-secondary">
@@ -342,11 +351,16 @@ export default function FarmerProfilePage() {
                     {new Date(h.issuedDate).toLocaleDateString("en-UG", {
                       day: "numeric", month: "short", year: "numeric",
                     })}
+                    <div className="sm:hidden mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-400">
+                      <span>{Number(h.kgEquivalent).toLocaleString()} kg</span>
+                      <span>· {h.issuedBy.name}</span>
+                      {h.notes && <span>· {h.notes}</span>}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold text-deepest">{h.bagsIssued}</td>
-                  <td className="px-4 py-3 text-right text-gray-500">{Number(h.kgEquivalent).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-gray-500">{h.issuedBy.name}</td>
-                  <td className="px-4 py-3 text-gray-400">{h.notes ?? "—"}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-deepest">{h.bagsIssued} bags</td>
+                  <td className="px-4 py-3 text-right text-gray-500 hidden sm:table-cell">{Number(h.kgEquivalent).toLocaleString()} kg</td>
+                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{h.issuedBy.name}</td>
+                  <td className="px-4 py-3 text-gray-400 hidden lg:table-cell">{h.notes ?? "—"}</td>
                 </tr>
               ))
             )}
@@ -356,35 +370,38 @@ export default function FarmerProfilePage() {
 
       {/* Payments History */}
       <div className="bg-white rounded-xl border border-surface-secondary overflow-hidden">
-        <div className="px-5 py-4 border-b border-surface-secondary flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Banknote className="h-4 w-4 text-primary" />
-            <h2 className="font-semibold text-primary">Payments</h2>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
-              Total paid: <strong className="text-primary">UGX {stats.totalPaidUgx.toLocaleString()}</strong>
-            </span>
+        <div className="px-5 py-3 border-b border-surface-secondary">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Banknote className="h-4 w-4 text-primary flex-shrink-0" />
+              <h2 className="font-semibold text-primary">Payments</h2>
+              <span className="text-sm text-gray-500 hidden sm:inline">
+                · Total paid: <strong className="text-primary">UGX {stats.totalPaidUgx.toLocaleString()}</strong>
+              </span>
+            </div>
             <button
               onClick={() => {
                 setPaymentForm(f => ({ ...f, paymentMethod: preferenceToMethod[farmer.paymentPreference] ?? "CASH" }));
                 setShowPaymentModal(true);
               }}
-              className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors flex-shrink-0"
             >
-              <Plus className="h-3.5 w-3.5" />Record Payment
+              <Plus className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Record </span>Payment
             </button>
           </div>
+          <p className="sm:hidden text-xs text-gray-500 mt-1 pl-6">
+            Total paid: <strong className="text-primary">UGX {stats.totalPaidUgx.toLocaleString()}</strong>
+          </p>
         </div>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-surface-secondary bg-surface-primary">
               <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Date</th>
               <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Amount (UGX)</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Method</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Reference</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Recorded By</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary">Notes</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden sm:table-cell">Method</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden md:table-cell">Reference</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-primary hidden lg:table-cell">Recorded By</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-secondary">
@@ -397,18 +414,24 @@ export default function FarmerProfilePage() {
                 <tr key={p.id} className="hover:bg-surface-primary/50">
                   <td className="px-4 py-3 text-gray-600">
                     {new Date(p.paymentDate).toLocaleDateString("en-UG", { day: "numeric", month: "short", year: "numeric" })}
+                    <div className="sm:hidden mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-400">
+                      <span className="inline-flex rounded-full bg-primary/10 text-primary px-1.5 py-0.5 text-[10px] font-semibold">
+                        {p.paymentMethod.replace(/_/g, " ")}
+                      </span>
+                      {p.referenceNumber && <span>Ref: {p.referenceNumber}</span>}
+                      <span>· {p.recordedBy.name}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-primary">
                     {Number(p.amount).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 hidden sm:table-cell">
                     <span className="inline-flex rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
-                      {p.paymentMethod.replace("_", " ")}
+                      {p.paymentMethod.replace(/_/g, " ")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{p.referenceNumber ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-500">{p.recordedBy.name}</td>
-                  <td className="px-4 py-3 text-gray-400">{p.notes ?? "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 hidden md:table-cell">{p.referenceNumber ?? "—"}</td>
+                  <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{p.recordedBy.name}</td>
                 </tr>
               ))
             )}
