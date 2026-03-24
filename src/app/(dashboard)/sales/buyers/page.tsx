@@ -146,9 +146,9 @@ export default function BuyersPage() {
             <tbody className="divide-y divide-[#F0F0F0]">
               {buyers.map(buyer => (
                 <tr key={buyer.id} className="hover:bg-[#F9F9F9] transition-colors">
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#240C64]/10 flex items-center justify-center flex-shrink-0">
+                  <td className="px-4 py-4 align-top">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[#240C64]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Building2 className="h-4 w-4 text-[#240C64]" />
                       </div>
                       <div>
@@ -158,15 +158,15 @@ export default function BuyersPage() {
                         </p>
                         {/* Mobile sub-text: type + order count */}
                         <div className="sm:hidden mt-1.5 flex items-center gap-2">
-                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                          <span className={`whitespace-nowrap inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
                             buyer.buyerType === "EXPORTER"
                               ? "bg-[#240C64]/10 border-[#240C64]/20 text-[#240C64]"
                               : "bg-[#F6F6F6] border-[#E8E8E8] text-[#6B6B6B]"
                           }`}>
                             {TYPE_LABELS[buyer.buyerType]}
                           </span>
-                          <span className="flex items-center gap-1 text-[11px] text-[#6B6B6B]">
-                            <ShoppingCart className="h-3 w-3" />
+                          <span className="whitespace-nowrap flex items-center gap-1 text-[11px] text-[#6B6B6B]">
+                            <ShoppingCart className="h-3 w-3 flex-shrink-0" />
                             {buyer._count.saleOrders} order{buyer._count.saleOrders !== 1 ? "s" : ""}
                           </span>
                         </div>
@@ -201,11 +201,11 @@ export default function BuyersPage() {
                       <span className="font-semibold text-[#1D1D1D]">{buyer._count.saleOrders}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center justify-end gap-3">
+                  <td className="px-4 py-4 align-top">
+                    <div className="flex items-center justify-end gap-3 pt-0.5">
                       <button
                         onClick={() => openEdit(buyer)}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] hover:text-[#1D1D1D] transition-colors"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] hover:text-[#1D1D1D] transition-colors whitespace-nowrap"
                       >
                         <Pencil className="h-3.5 w-3.5" />Edit
                       </button>
