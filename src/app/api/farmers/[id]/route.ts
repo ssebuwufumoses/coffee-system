@@ -74,13 +74,24 @@ export async function GET(
     _sum: { amount: true },
   });
 
-  const huskSetting = await prisma.systemSetting.findUnique({
-    where: { key: "husk_coffee_kg_per_bag" },
+  // Husks earned = sum of actual husk output from completed milling batches this farmer owns
+  const milledHusksAgg = await prisma.millingBatchOwner.aggregate({
+    where: {
+      farmerId: id,
+      millingBatch: { status: "COMPLETED" },
+      outputHusksKg: { not: null },
+    },
+    _sum: { outputHusksKg: true },
   });
-  const huskKgPerBag = parseFloat(huskSetting?.value ?? "100");
+
+  const huskBagSetting = await prisma.systemSetting.findUnique({
+    where: { key: "husk_kg_per_bag" },
+  });
+  const huskKgPerBag = parseFloat(huskBagSetting?.value ?? "20");
 
   const totalDeliveredKg = Number(deliveryAgg._sum.weightKg ?? 0);
-  const husksEarnedBags = Math.floor(totalDeliveredKg / huskKgPerBag);
+  const milledHusksKg = Number(milledHusksAgg._sum.outputHusksKg ?? 0);
+  const husksEarnedBags = Math.floor(milledHusksKg / huskKgPerBag);
   const husksTakenBags = Number(huskIssuanceAgg._sum.bagsIssued ?? 0);
   const husksBalanceBags = husksEarnedBags - husksTakenBags;
 
@@ -89,6 +100,7 @@ export async function GET(
     stats: {
       totalDeliveries: deliveryAgg._count,
       totalDeliveredKg,
+      milledHusksKg,
       husksEarnedBags,
       husksTakenBags,
       husksBalanceBags,

@@ -42,7 +42,7 @@ type FarmerProfile = {
   stats: {
     totalDeliveries: number; totalDeliveredKg: number;
     husksEarnedBags: number; husksTakenBags: number;
-    husksBalanceBags: number; huskKgPerBag: number; totalPaidUgx: number;
+    husksBalanceBags: number; huskKgPerBag: number; milledHusksKg: number; totalPaidUgx: number;
   };
 };
 
@@ -249,7 +249,7 @@ export default function FarmerProfilePage() {
         <StatCard
           label="Husks Earned"
           value={`${stats.husksEarnedBags} bags`}
-          sub={`${stats.huskKgPerBag}kg per bag`}
+          sub={`${stats.milledHusksKg.toLocaleString()} kg milled husks`}
         />
         <StatCard
           label="Husks Taken"
