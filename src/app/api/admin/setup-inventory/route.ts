@@ -9,17 +9,22 @@ export async function POST(request: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  // Get all coffee varieties
+  // Ensure coffee varieties exist (upsert)
+  const varietyDefs = [
+    { code: "ROB", name: "Robusta", description: "Coffea canephora — the primary variety" },
+    { code: "ARA", name: "Arabica", description: "Coffea arabica — highland variety" },
+    { code: "KBK", name: "Kiboko", description: "Dry/natural processed cherry coffee" },
+  ];
+  for (const v of varietyDefs) {
+    await prisma.coffeeVariety.upsert({ where: { code: v.code }, update: {}, create: v });
+  }
+
   const varieties = await prisma.coffeeVariety.findMany();
   const byCode = Object.fromEntries(varieties.map(v => [v.code, v.id]));
 
   const ROB = byCode["ROB"];
   const ARA = byCode["ARA"];
   const KBK = byCode["KBK"];
-
-  if (!ROB || !ARA || !KBK) {
-    return NextResponse.json({ error: "Coffee varieties not found. Run seed first." }, { status: 400 });
-  }
 
   // Delete items that have 0 stock and no movement history (safe to remove)
   const allItems = await prisma.inventoryItem.findMany();
