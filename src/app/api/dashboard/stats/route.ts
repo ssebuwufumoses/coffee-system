@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
     .reduce((s, i) => s + parseFloat(i.currentStockKg.toString()), 0);
 
   const huskSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } });
-  const huskKgPerBag = huskSetting ? parseFloat(huskSetting.value) : 100;
+  const huskKgPerBag = huskSetting ? parseFloat(huskSetting.value) : 20;
 
   const lowStockCount = inventoryItems.filter(
     i => i.lowStockAlertKg && parseFloat(i.currentStockKg.toString()) <= parseFloat(i.lowStockAlertKg.toString())
