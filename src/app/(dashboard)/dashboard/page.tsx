@@ -28,6 +28,7 @@ interface Stats {
   rawStockKg: number;
   processedBeansKg: number;
   husksKg: number;
+  huskKgPerBag: number;
   lowStockCount: number;
   completedMillingBatches: number;
   avgConversionRate: string | null;
@@ -264,7 +265,7 @@ export default function DashboardPage() {
                   { Icon: Truck, label: "Intake deliveries", value: `${stats.deliveriesThisMonth} deliveries`, sub: fmtKg(stats.weightThisMonthKg) + " received" },
                   { Icon: Factory, label: "Active milling", value: `${stats.activeBatches} batch${stats.activeBatches !== 1 ? "es" : ""} in progress`, sub: `${stats.completedMillingBatches} completed · avg ${stats.avgConversionRate ?? "—"}% conversion` },
                   { Icon: ShoppingCart, label: "New orders", value: `${stats.ordersThisMonth} order${stats.ordersThisMonth !== 1 ? "s" : ""}`, sub: fmtUgx(stats.revenueThisMonth) + " total value" },
-                  { Icon: Leaf, label: "Husks in stock", value: fmtKg(stats.husksKg), sub: "Available to issue to farmers" },
+                  { Icon: Leaf, label: "Husks in stock", value: `${Math.floor(stats.husksKg / stats.huskKgPerBag)} bags`, sub: "Available to issue to farmers" },
                 ].map(({ Icon, label, value, sub }) => (
                   <div key={label} className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-[#F6F6F6] flex items-center justify-center flex-shrink-0">
