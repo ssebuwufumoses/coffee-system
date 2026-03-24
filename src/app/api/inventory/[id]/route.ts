@@ -4,8 +4,9 @@ import { verifyToken, COOKIE_NAME } from "@/lib/auth";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,12 +19,12 @@ export async function PATCH(
   if (!category) return NextResponse.json({ error: "Category is required" }, { status: 400 });
 
   const duplicate = await prisma.inventoryItem.findFirst({
-    where: { name: name.trim(), NOT: { id: params.id } },
+    where: { name: name.trim(), NOT: { id } },
   });
   if (duplicate) return NextResponse.json({ error: "Another item with this name already exists" }, { status: 409 });
 
   const item = await prisma.inventoryItem.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: name.trim(),
       category,
@@ -38,14 +39,15 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const session = token ? await verifyToken(token) : null;
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (session.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const item = await prisma.inventoryItem.findUnique({ where: { id: params.id } });
+  const item = await prisma.inventoryItem.findUnique({ where: { id } });
   if (!item) return NextResponse.json({ error: "Item not found" }, { status: 404 });
 
   if (parseFloat(String(item.currentStockKg)) > 0) {
@@ -55,7 +57,7 @@ export async function DELETE(
     );
   }
 
-  const movementCount = await prisma.stockMovement.count({ where: { inventoryItemId: params.id } });
+  const movementCount = await prisma.stockMovement.count({ where: { inventoryItemId: id } });
   if (movementCount > 0) {
     return NextResponse.json(
       { error: "Cannot delete: item has stock movement history and cannot be removed." },
@@ -63,6 +65,6 @@ export async function DELETE(
     );
   }
 
-  await prisma.inventoryItem.delete({ where: { id: params.id } });
+  await prisma.inventoryItem.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }
