@@ -143,95 +143,146 @@ export default function SalesPage() {
             )}
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Order</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Buyer</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Variety</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Qty</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">Total</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Status</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden xl:table-cell">Date</th>
-                <th scope="col" className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F0F0F0]">
+          <>
+            {/* ── Mobile card list ── */}
+            <div className="sm:hidden divide-y divide-[#F0F0F0]">
               {filtered.map(order => {
                 const sc = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.DRAFT;
                 const dispatchedKg = order.dispatches.reduce((s, d) => s + parseFloat(String(d.dispatchedKg)), 0);
                 const invoice = order.invoices[0];
-
                 return (
-                  <tr key={order.id} className="hover:bg-[#F9F9F9] transition-colors">
-                    <td className="px-4 py-3.5">
-                      <p className="font-mono text-xs font-bold text-[#240C64]">{order.orderNumber}</p>
-                      <p className="text-xs text-[#9B9B9B] mt-0.5">by {order.createdBy.name}</p>
-                      {/* Mobile sub-text: buyer + date + status */}
-                      <div className="sm:hidden mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs font-medium text-[#1D1D1D]">{order.buyer.companyName}</span>
-                        <span className="text-[11px] text-[#9B9B9B]">· {fmtDate(order.createdAt)}</span>
-                        <span
-                          className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border"
-                          style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}
-                        >
-                          {sc.label}
-                        </span>
+                  <div key={order.id} className="p-4">
+                    {/* Top row: order number + qty */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-mono text-xs font-bold text-[#240C64]">{order.orderNumber}</p>
+                        <p className="text-xs text-[#9B9B9B] mt-0.5">by {order.createdBy.name}</p>
                       </div>
-                    </td>
-                    <td className="px-4 py-3.5 hidden sm:table-cell">
-                      <p className="font-medium text-[#1D1D1D]">{order.buyer.companyName}</p>
-                      <p className="text-xs text-[#9B9B9B] mt-0.5">
-                        {order.buyer.buyerType === "EXPORTER" ? "Exporter" : "Local Trader"}
-                      </p>
-                    </td>
-                    <td className="px-4 py-3.5 hidden md:table-cell">
-                      <span className="text-[#6B6B6B]">{order.coffeeVariety.name}</span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <span className="font-semibold text-[#1D1D1D]">{fmtKg(order.quantityKg)}</span>
-                      {dispatchedKg > 0 && (
-                        <p className="text-xs text-[#9B9B9B] mt-0.5">{fmtKg(dispatchedKg)} out</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3.5 text-right hidden lg:table-cell">
-                      <span className="font-semibold text-[#1D1D1D]">{fmtUgx(order.totalAmountUgx)}</span>
-                      {invoice && (
-                        <p className={`text-xs mt-0.5 font-medium ${
-                          invoice.paymentStatus === "FULLY_PAID" ? "text-emerald-700" :
-                          invoice.paymentStatus === "PARTIALLY_PAID" ? "text-amber-700" :
-                          "text-[#9B9B9B]"
-                        }`}>
-                          {invoice.paymentStatus === "FULLY_PAID" ? "Paid" :
-                           invoice.paymentStatus === "PARTIALLY_PAID" ? "Part paid" :
-                           "Unpaid"}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3.5 text-center hidden sm:table-cell">
+                      <div className="flex-shrink-0 text-right">
+                        <p className="font-bold text-lg text-[#1D1D1D] leading-tight whitespace-nowrap">{fmtKg(order.quantityKg)}</p>
+                        {dispatchedKg > 0 && (
+                          <p className="text-[11px] text-[#9B9B9B] whitespace-nowrap">{fmtKg(dispatchedKg)} dispatched</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Middle: buyer name */}
+                    <p className="font-semibold text-[#1D1D1D] mt-2">{order.buyer.companyName}</p>
+                    <p className="text-xs text-[#9B9B9B]">
+                      {order.buyer.buyerType === "EXPORTER" ? "Exporter" : "Local Trader"}
+                    </p>
+
+                    {/* Date + status badge */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-[#9B9B9B]">{fmtDate(order.createdAt)}</span>
                       <span
                         className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border"
                         style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}
                       >
                         {sc.label}
                       </span>
-                    </td>
-                    <td className="px-4 py-3.5 hidden xl:table-cell text-[#9B9B9B] text-xs">
-                      {fmtDate(order.createdAt)}
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
+                      {invoice && (
+                        <span className={`text-xs font-medium ${
+                          invoice.paymentStatus === "FULLY_PAID" ? "text-emerald-700" :
+                          invoice.paymentStatus === "PARTIALLY_PAID" ? "text-amber-700" : "text-[#9B9B9B]"
+                        }`}>
+                          · {invoice.paymentStatus === "FULLY_PAID" ? "Paid" :
+                             invoice.paymentStatus === "PARTIALLY_PAID" ? "Part paid" : "Unpaid"}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* View button */}
+                    <div className="mt-3">
                       <Link
                         href={`/sales/${order.id}`}
-                        className="text-xs font-semibold text-[#240C64] hover:underline"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[#240C64] px-4 py-1.5 text-xs font-semibold text-[#240C64] hover:bg-[#240C64] hover:text-white transition-colors"
                       >
-                        View
+                        View Order →
                       </Link>
-                    </td>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Desktop table ── */}
+            <table className="hidden sm:table w-full text-sm">
+              <thead>
+                <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
+                  <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Order</th>
+                  <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Buyer</th>
+                  <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Variety</th>
+                  <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Qty</th>
+                  <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">Total</th>
+                  <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Status</th>
+                  <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden xl:table-cell">Date</th>
+                  <th scope="col" className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F0F0F0]">
+                {filtered.map(order => {
+                  const sc = STATUS_CONFIG[order.status] ?? STATUS_CONFIG.DRAFT;
+                  const dispatchedKg = order.dispatches.reduce((s, d) => s + parseFloat(String(d.dispatchedKg)), 0);
+                  const invoice = order.invoices[0];
+                  return (
+                    <tr key={order.id} className="hover:bg-[#F9F9F9] transition-colors">
+                      <td className="px-4 py-3.5">
+                        <p className="font-mono text-xs font-bold text-[#240C64]">{order.orderNumber}</p>
+                        <p className="text-xs text-[#9B9B9B] mt-0.5">by {order.createdBy.name}</p>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <p className="font-medium text-[#1D1D1D]">{order.buyer.companyName}</p>
+                        <p className="text-xs text-[#9B9B9B] mt-0.5">
+                          {order.buyer.buyerType === "EXPORTER" ? "Exporter" : "Local Trader"}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3.5 hidden md:table-cell">
+                        <span className="text-[#6B6B6B]">{order.coffeeVariety.name}</span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right">
+                        <span className="font-semibold text-[#1D1D1D]">{fmtKg(order.quantityKg)}</span>
+                        {dispatchedKg > 0 && (
+                          <p className="text-xs text-[#9B9B9B] mt-0.5">{fmtKg(dispatchedKg)} out</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 text-right hidden lg:table-cell">
+                        <span className="font-semibold text-[#1D1D1D]">{fmtUgx(order.totalAmountUgx)}</span>
+                        {invoice && (
+                          <p className={`text-xs mt-0.5 font-medium ${
+                            invoice.paymentStatus === "FULLY_PAID" ? "text-emerald-700" :
+                            invoice.paymentStatus === "PARTIALLY_PAID" ? "text-amber-700" : "text-[#9B9B9B]"
+                          }`}>
+                            {invoice.paymentStatus === "FULLY_PAID" ? "Paid" :
+                             invoice.paymentStatus === "PARTIALLY_PAID" ? "Part paid" : "Unpaid"}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5 text-center">
+                        <span
+                          className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border"
+                          style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}
+                        >
+                          {sc.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 hidden xl:table-cell text-[#9B9B9B] text-xs">
+                        {fmtDate(order.createdAt)}
+                      </td>
+                      <td className="px-4 py-3.5 text-right">
+                        <Link
+                          href={`/sales/${order.id}`}
+                          className="text-xs font-semibold text-[#240C64] hover:underline"
+                        >
+                          View
+                        </Link>
+                      </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          </>
         )}
       </div>
     </div>
