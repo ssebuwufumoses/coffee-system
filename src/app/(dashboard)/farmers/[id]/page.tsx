@@ -42,7 +42,7 @@ type FarmerProfile = {
   stats: {
     totalDeliveries: number; totalDeliveredKg: number;
     husksEarnedBags: number; husksTakenBags: number;
-    husksBalanceBags: number; huskKgPerBag: number; milledHusksKg: number; totalPaidUgx: number;
+    husksBalanceBags: number; huskCoffeeKgPerBag: number; totalPaidUgx: number;
   };
 };
 
@@ -249,7 +249,7 @@ export default function FarmerProfilePage() {
         <StatCard
           label="Husks Earned"
           value={`${stats.husksEarnedBags} bags`}
-          sub={`${stats.milledHusksKg.toLocaleString()} kg milled husks`}
+          sub={`1 bag per ${stats.huskCoffeeKgPerBag} kg delivered`}
         />
         <StatCard
           label="Husks Taken"
@@ -558,7 +558,7 @@ export default function FarmerProfilePage() {
         <IssueHusksModal
           farmer={{ id: farmer.id, name: farmer.name, farmerCode: farmer.farmerCode }}
           balanceBags={stats.husksBalanceBags}
-          huskKgPerBag={stats.huskKgPerBag}
+          huskKgPerBag={stats.huskCoffeeKgPerBag}
           onClose={() => setShowIssueModal(false)}
           onSuccess={() => {
             setShowIssueModal(false);

@@ -80,37 +80,21 @@ export async function GET(request: NextRequest) {
   });
   const totalMap = Object.fromEntries(totals.map((t) => [t.farmerId, t._sum.weightKg ?? 0]));
 
-  const huskKgPerBag = await prisma.systemSetting
-    .findUnique({ where: { key: "husk_kg_per_bag" } })
-    .then((s) => parseFloat(s?.value ?? "20"));
+  // Entitlement ratio: kg of coffee delivered to earn 1 bag (default 100)
+  const huskCoffeeKgPerBag = await prisma.systemSetting
+    .findUnique({ where: { key: "husk_coffee_kg_per_bag" } })
+    .then((s) => parseFloat(s?.value ?? "100"));
 
-  // Earned bags from actual milling output (not delivery weight)
-  const [milledHusksRows, issuanceTotals] = await Promise.all([
-    prisma.millingBatchOwner.findMany({
-      where: {
-        farmerId: { in: farmerIds },
-        millingBatch: { status: "COMPLETED" },
-        outputHusksKg: { not: null },
-      },
-      select: { farmerId: true, outputHusksKg: true },
-    }),
-    prisma.huskIssuance.groupBy({
-      by: ["farmerId"],
-      where: { farmerId: { in: farmerIds } },
-      _sum: { bagsIssued: true },
-    }),
-  ]);
-
-  const milledHusksMap: Record<string, number> = {};
-  for (const row of milledHusksRows) {
-    milledHusksMap[row.farmerId] = (milledHusksMap[row.farmerId] ?? 0) + Number(row.outputHusksKg ?? 0);
-  }
+  const issuanceTotals = await prisma.huskIssuance.groupBy({
+    by: ["farmerId"],
+    where: { farmerId: { in: farmerIds } },
+    _sum: { bagsIssued: true },
+  });
   const issuanceMap = Object.fromEntries(issuanceTotals.map((t) => [t.farmerId, Number(t._sum.bagsIssued ?? 0)]));
 
   const result = farmers.map((f) => {
     const deliveredKg = Number(totalMap[f.id] ?? 0);
-    const milledHusksKg = milledHusksMap[f.id] ?? 0;
-    const husksEarned = Math.floor(milledHusksKg / huskKgPerBag);
+    const husksEarned = Math.floor(deliveredKg / huskCoffeeKgPerBag);
     const husksTaken = issuanceMap[f.id] ?? 0;
     const husksBalance = husksEarned - husksTaken;
     return { ...f, deliveredKg, husksEarned, husksTaken, husksBalance };

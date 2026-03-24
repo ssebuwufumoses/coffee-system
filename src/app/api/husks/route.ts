@@ -35,35 +35,23 @@ export async function GET(request: NextRequest) {
       take: limit,
     }),
     prisma.huskIssuance.count({ where }),
-    prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } }),
+    prisma.systemSetting.findUnique({ where: { key: "husk_coffee_kg_per_bag" } }),
   ]);
 
-  const huskKgPerBag = parseFloat(huskSetting?.value ?? "20");
+  // Entitlement: kg coffee delivered to earn 1 bag (default 100)
+  const huskCoffeeKgPerBag = parseFloat(huskSetting?.value ?? "100");
 
   // Compute current husk balance per unique farmer in this page
   const uniqueFarmerIds = [...new Set(issuances.map((i) => i.farmerId))];
 
-  // Earned bags = based on actual milled husk output (from completed batches)
-  const [milledHusksRows, issuanceAggs] = await Promise.all([
-    prisma.millingBatchOwner.findMany({
-      where: {
-        farmerId: { in: uniqueFarmerIds },
-        millingBatch: { status: "COMPLETED" },
-        outputHusksKg: { not: null },
-      },
-      select: { farmerId: true, outputHusksKg: true },
-    }),
+  const [deliveryAggs, issuanceAggs] = await Promise.all([
+    prisma.delivery.groupBy({ by: ["farmerId"], where: { farmerId: { in: uniqueFarmerIds } }, _sum: { weightKg: true } }),
     prisma.huskIssuance.groupBy({ by: ["farmerId"], where: { farmerId: { in: uniqueFarmerIds } }, _sum: { bagsIssued: true } }),
   ]);
 
-  const milledHusksMap: Record<string, number> = {};
-  for (const row of milledHusksRows) {
-    milledHusksMap[row.farmerId] = (milledHusksMap[row.farmerId] ?? 0) + Number(row.outputHusksKg ?? 0);
-  }
-
   const balanceMap = Object.fromEntries(uniqueFarmerIds.map((fId) => {
-    const milledKg = milledHusksMap[fId] ?? 0;
-    const earned = Math.floor(milledKg / huskKgPerBag);
+    const delivered = Number(deliveryAggs.find((d) => d.farmerId === fId)?._sum.weightKg ?? 0);
+    const earned = Math.floor(delivered / huskCoffeeKgPerBag);
     const taken = Number(issuanceAggs.find((i) => i.farmerId === fId)?._sum.bagsIssued ?? 0);
     return [fId, { earned, taken, balance: earned - taken }];
   }));
@@ -91,26 +79,23 @@ export async function POST(request: NextRequest) {
 
   const { farmerId, bagsIssued, issuedDate, notes } = parsed.data;
 
-  // --- Business Rule: Cannot issue more than earned ---
-  const huskBagSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } });
-  // husk_kg_per_bag: physical weight of one husk bag (default 20 kg)
+  // --- Business Rule: Cannot issue more than earned or available in warehouse ---
+  const [huskEntitlementSetting, huskBagSetting] = await Promise.all([
+    prisma.systemSetting.findUnique({ where: { key: "husk_coffee_kg_per_bag" } }),
+    prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } }),
+  ]);
+  // kg of coffee to earn 1 bag (entitlement, default 100)
+  const huskCoffeeKgPerBag = parseFloat(huskEntitlementSetting?.value ?? "100");
+  // physical weight of one husk bag (default 20 kg)
   const huskBagWeightKg = parseFloat(huskBagSetting?.value ?? "20");
-  const huskKgPerBag = huskBagWeightKg;
 
-  const [milledHusksAgg, issuanceAgg] = await Promise.all([
-    prisma.millingBatchOwner.aggregate({
-      where: {
-        farmerId,
-        millingBatch: { status: "COMPLETED" },
-        outputHusksKg: { not: null },
-      },
-      _sum: { outputHusksKg: true },
-    }),
+  const [deliveryAgg, issuanceAgg] = await Promise.all([
+    prisma.delivery.aggregate({ where: { farmerId }, _sum: { weightKg: true } }),
     prisma.huskIssuance.aggregate({ where: { farmerId }, _sum: { bagsIssued: true } }),
   ]);
 
-  const milledHusksKg = Number(milledHusksAgg._sum.outputHusksKg ?? 0);
-  const husksEarnedBags = Math.floor(milledHusksKg / huskKgPerBag);
+  const totalDeliveredKg = Number(deliveryAgg._sum.weightKg ?? 0);
+  const husksEarnedBags = Math.floor(totalDeliveredKg / huskCoffeeKgPerBag);
   const husksTakenBags = Number(issuanceAgg._sum.bagsIssued ?? 0);
   const husksBalanceBags = husksEarnedBags - husksTakenBags;
 
@@ -120,7 +105,7 @@ export async function POST(request: NextRequest) {
     }, { status: 400 });
   }
 
-  // Physical kg to deduct from warehouse = bags × physical bag weight (20kg)
+  // Physical kg to deduct from warehouse = bags × physical bag weight (20 kg)
   const kgEquivalent = bagsIssued * huskBagWeightKg;
 
   // Find husk inventory item
