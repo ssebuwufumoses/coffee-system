@@ -135,18 +135,18 @@ export default function BuyersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
-                <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Company</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Company</th>
                 <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Contact</th>
                 <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">Location</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Type</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Orders</th>
-                <th scope="col" className="px-5 py-3" />
+                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Type</th>
+                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Orders</th>
+                <th scope="col" className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F0F0F0]">
               {buyers.map(buyer => (
                 <tr key={buyer.id} className="hover:bg-[#F9F9F9] transition-colors">
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-[#240C64]/10 flex items-center justify-center flex-shrink-0">
                         <Building2 className="h-4 w-4 text-[#240C64]" />
@@ -154,9 +154,22 @@ export default function BuyersPage() {
                       <div>
                         <p className="font-semibold text-[#1D1D1D]">{buyer.companyName}</p>
                         <p className="text-xs text-[#9B9B9B] flex items-center gap-1 mt-0.5">
-                          <Phone className="h-3 w-3" />
-                          {buyer.phone}
+                          <Phone className="h-3 w-3" />{buyer.phone}
                         </p>
+                        {/* Mobile sub-text: type + order count */}
+                        <div className="sm:hidden mt-1.5 flex items-center gap-2">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                            buyer.buyerType === "EXPORTER"
+                              ? "bg-[#240C64]/10 border-[#240C64]/20 text-[#240C64]"
+                              : "bg-[#F6F6F6] border-[#E8E8E8] text-[#6B6B6B]"
+                          }`}>
+                            {TYPE_LABELS[buyer.buyerType]}
+                          </span>
+                          <span className="flex items-center gap-1 text-[11px] text-[#6B6B6B]">
+                            <ShoppingCart className="h-3 w-3" />
+                            {buyer._count.saleOrders} order{buyer._count.saleOrders !== 1 ? "s" : ""}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -164,18 +177,16 @@ export default function BuyersPage() {
                     <p className="text-[#1D1D1D]">{buyer.contactName}</p>
                     {buyer.email && (
                       <p className="text-xs text-[#9B9B9B] flex items-center gap-1 mt-0.5">
-                        <Mail className="h-3 w-3" />
-                        {buyer.email}
+                        <Mail className="h-3 w-3" />{buyer.email}
                       </p>
                     )}
                   </td>
                   <td className="px-4 py-4 hidden lg:table-cell">
                     <p className="text-[#6B6B6B] flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {buyer.location}
+                      <MapPin className="h-3.5 w-3.5" />{buyer.location}
                     </p>
                   </td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-4 text-center hidden sm:table-cell">
                     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
                       buyer.buyerType === "EXPORTER"
                         ? "bg-[#240C64]/10 border-[#240C64]/20 text-[#240C64]"
@@ -184,25 +195,23 @@ export default function BuyersPage() {
                       {TYPE_LABELS[buyer.buyerType]}
                     </span>
                   </td>
-                  <td className="px-4 py-4 text-center">
+                  <td className="px-4 py-4 text-center hidden sm:table-cell">
                     <div className="flex items-center justify-center gap-1 text-[#6B6B6B]">
                       <ShoppingCart className="h-3.5 w-3.5" />
                       <span className="font-semibold text-[#1D1D1D]">{buyer._count.saleOrders}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-4">
                     <div className="flex items-center justify-end gap-3">
                       <button
                         onClick={() => openEdit(buyer)}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B]
-                          hover:text-[#1D1D1D] transition-colors"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] hover:text-[#1D1D1D] transition-colors"
                       >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Edit
+                        <Pencil className="h-3.5 w-3.5" />Edit
                       </button>
                       <Link
                         href={`/sales/new?buyerId=${buyer.id}`}
-                        className="text-xs font-semibold text-[#240C64] hover:underline"
+                        className="text-xs font-semibold text-[#240C64] hover:underline whitespace-nowrap"
                       >
                         New Order
                       </Link>
