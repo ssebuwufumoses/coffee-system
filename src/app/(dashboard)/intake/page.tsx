@@ -92,7 +92,7 @@ export default function DeliveriesPage() {
                 <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Weight</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden lg:table-cell">Moisture %</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden lg:table-cell">Recorded By</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Status</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Status</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
@@ -115,12 +115,26 @@ export default function DeliveriesPage() {
                     <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{formatDate(d.deliveryDate)}</td>
                     <td className="px-4 py-3">
                       <Link href={`/farmers/${d.farmer.id}`} className="group">
-                        <div className="font-medium text-primary group-hover:underline flex items-center gap-1">
+                        <div className="font-medium text-primary group-hover:underline flex items-center gap-1 truncate max-w-[140px] sm:max-w-none">
                           {d.farmer.name}
-                          <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+                          <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-0 group-hover:opacity-50 transition-opacity" />
                         </div>
                         <div className="text-xs text-gray-400">{d.farmer.farmerCode}</div>
                       </Link>
+                      {/* Date + variety + status — mobile sub-text */}
+                      <div className="sm:hidden mt-1 flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] text-gray-400">{formatDate(d.deliveryDate)}</span>
+                        <span className="text-[10px] text-gray-400">·</span>
+                        <span className="text-[10px] text-gray-500">{d.coffeeVariety.name}</span>
+                        <span className="text-[10px] text-gray-400">·</span>
+                        {d.status === "MILLED" ? (
+                          <span className="text-[10px] font-semibold text-success">✓ Milled</span>
+                        ) : d.status === "IN_PROGRESS" ? (
+                          <span className="text-[10px] font-semibold text-primary">⚙ Milling</span>
+                        ) : (
+                          <span className="text-[10px] font-semibold text-warning">⏳ Pending</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
                       <Badge variant="muted">{d.coffeeVariety.name}</Badge>
@@ -130,7 +144,7 @@ export default function DeliveriesPage() {
                       {d.moistureContentPct ? `${parseFloat(d.moistureContentPct).toFixed(1)}%` : "—"}
                     </td>
                     <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">{d.recordedBy.name}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 hidden sm:table-cell">
                       {d.status === "MILLED" ? (
                         <span className="inline-flex items-center gap-1 text-xs font-semibold text-success bg-success/10 rounded-full px-2.5 py-1">
                           ✓ Milled
@@ -147,7 +161,10 @@ export default function DeliveriesPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link href={`/intake/${d.id}`}>
-                        <Button variant="outline" size="sm">Receipt</Button>
+                        <Button variant="outline" size="sm">
+                          <span className="hidden sm:inline">Receipt</span>
+                          <ExternalLink className="h-3.5 w-3.5 sm:hidden" />
+                        </Button>
                       </Link>
                     </td>
                   </tr>
