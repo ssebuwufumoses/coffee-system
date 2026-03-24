@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, UserPlus, Phone, MapPin, Leaf, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, UserPlus, Phone, MapPin, Leaf, ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,9 @@ export default function FarmersPage() {
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<Farmer | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const fetchFarmers = useCallback(async () => {
     setLoading(true);
@@ -54,6 +57,18 @@ export default function FarmersPage() {
 
   // Reset to page 1 on new search
   useEffect(() => { setPage(1); }, [search]);
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleteError(""); setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/farmers/${deleteTarget.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) { setDeleteError(data.error ?? "Failed to delete farmer"); return; }
+      setDeleteTarget(null);
+      fetchFarmers();
+    } finally { setDeleteLoading(false); }
+  }
 
   return (
     <div className="space-y-6">
@@ -93,6 +108,7 @@ export default function FarmersPage() {
               <th className="text-right px-4 py-3 font-semibold text-primary text-xs uppercase tracking-wide hidden md:table-cell">Delivered (kg)</th>
               <th className="text-right px-4 py-3 font-semibold text-primary text-xs uppercase tracking-wide">Husks</th>
               <th className="text-left px-4 py-3 font-semibold text-primary text-xs uppercase tracking-wide">Status</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-surface-secondary">
@@ -153,6 +169,17 @@ export default function FarmersPage() {
                       {farmer.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </td>
+                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                    {farmer.deliveredKg === 0 && farmer._count.deliveries === 0 && (
+                      <button
+                        onClick={() => { setDeleteTarget(farmer); setDeleteError(""); }}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        title="Delete farmer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
@@ -185,6 +212,38 @@ export default function FarmersPage() {
               Next
               <ChevronRight className="h-4 w-4" />
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-xl border border-gray-200 w-full max-w-sm shadow-xl">
+            <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">Delete Farmer</h3>
+              <button onClick={() => setDeleteTarget(null)} className="text-gray-400 hover:text-gray-700">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="px-5 py-4 space-y-3">
+              <p className="text-sm text-gray-700">
+                Delete <span className="font-semibold">{deleteTarget.name}</span> ({deleteTarget.farmerCode})?
+                This cannot be undone.
+              </p>
+              <p className="text-xs text-gray-400">Only farmers with no deliveries or payments can be deleted.</p>
+              {deleteError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{deleteError}</p>
+              )}
+              <div className="flex justify-end gap-3 pt-1">
+                <button onClick={() => setDeleteTarget(null)} className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button onClick={confirmDelete} disabled={deleteLoading} className="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
+                  {deleteLoading ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

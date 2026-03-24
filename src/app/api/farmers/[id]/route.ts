@@ -127,3 +127,34 @@ export async function PATCH(
 
   return NextResponse.json({ farmer });
 }
+
+// DELETE /api/farmers/[id] — only if farmer has no activity
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const session = token ? await verifyToken(token) : null;
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  const { id } = await params;
+
+  const [deliveries, millingOwners, huskIssuances, payments] = await Promise.all([
+    prisma.delivery.count({ where: { farmerId: id } }),
+    prisma.millingBatchOwner.count({ where: { farmerId: id } }),
+    prisma.huskIssuance.count({ where: { farmerId: id } }),
+    prisma.farmerPayment.count({ where: { farmerId: id } }),
+  ]);
+
+  const total = deliveries + millingOwners + huskIssuances + payments;
+  if (total > 0) {
+    return NextResponse.json(
+      { error: "Cannot delete: this farmer has existing deliveries, milling records, or payments. Deactivate them instead." },
+      { status: 400 }
+    );
+  }
+
+  await prisma.farmer.delete({ where: { id } });
+  return NextResponse.json({ success: true });
+}
