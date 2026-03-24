@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
   const totalMap = Object.fromEntries(totals.map((t) => [t.farmerId, t._sum.weightKg ?? 0]));
 
   const huskKgPerBag = await prisma.systemSetting
-    .findUnique({ where: { key: "husk_kg_per_bag" } })
+    .findUnique({ where: { key: "husk_coffee_kg_per_bag" } })
     .then((s) => parseFloat(s?.value ?? "100"));
 
   // Attach husk issuance totals per farmer

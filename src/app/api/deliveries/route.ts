@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
   });
 
   // 4. Calculate husk entitlement for response alert
-  const huskSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } });
+  const huskSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_coffee_kg_per_bag" } });
   const huskAlertSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_alert_threshold_bags" } });
   const huskKgPerBag = parseFloat(huskSetting?.value ?? "100");
   const alertThreshold = parseInt(huskAlertSetting?.value ?? "10", 10);

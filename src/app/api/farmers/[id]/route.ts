@@ -75,7 +75,7 @@ export async function GET(
   });
 
   const huskSetting = await prisma.systemSetting.findUnique({
-    where: { key: "husk_kg_per_bag" },
+    where: { key: "husk_coffee_kg_per_bag" },
   });
   const huskKgPerBag = parseFloat(huskSetting?.value ?? "100");
 

@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       take: limit,
     }),
     prisma.huskIssuance.count({ where }),
-    prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } }),
+    prisma.systemSetting.findUnique({ where: { key: "husk_coffee_kg_per_bag" } }),
   ]);
 
   const huskKgPerBag = parseFloat(huskSetting?.value ?? "100");
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
   // --- Business Rule: Cannot issue more than earned ---
   const [huskSetting, huskWeightSetting] = await Promise.all([
-    prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } }),
+    prisma.systemSetting.findUnique({ where: { key: "husk_coffee_kg_per_bag" } }),
     prisma.systemSetting.findUnique({ where: { key: "husk_bag_weight_kg" } }),
   ]);
   // husk_kg_per_bag: kg of coffee needed to earn 1 bag (default 100)

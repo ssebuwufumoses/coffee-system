@@ -43,7 +43,7 @@ export async function GET(
     _count: true,
   });
 
-  const huskSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_kg_per_bag" } });
+  const huskSetting = await prisma.systemSetting.findUnique({ where: { key: "husk_coffee_kg_per_bag" } });
   const huskKgPerBag = parseFloat(huskSetting?.value ?? "100");
   const totalKg = Number(agg._sum.weightKg ?? 0);
   const husksEarned = Math.floor(totalKg / huskKgPerBag);

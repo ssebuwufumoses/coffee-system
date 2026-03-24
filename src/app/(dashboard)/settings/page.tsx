@@ -44,9 +44,10 @@ const ROLE_COLORS: Record<string, { bg: string; text: string; border: string; do
 };
 
 const KNOWN_SETTINGS: { key: string; label: string; description: string; unit?: string }[] = [
-  { key: "husk_kg_per_bag",           label: "Husk Weight per Bag",  description: "Weight in kg of a single bag of husks", unit: "kg" },
-  { key: "husk_alert_threshold_bags", label: "Husk Alert Threshold", description: "Alert when husk stock falls below this many bags", unit: "bags" },
-  { key: "milling_target_rate",       label: "Milling Target Rate",  description: "Target milling conversion rate percentage", unit: "%" },
+  { key: "husk_kg_per_bag",           label: "Husk Bag Weight (kg)",        description: "Physical weight of one bag of husks — used to convert kg stock into bags", unit: "kg" },
+  { key: "husk_coffee_kg_per_bag",    label: "Coffee kg to Earn 1 Husk Bag", description: "How many kg of coffee a farmer must deliver to earn 1 bag of husks", unit: "kg" },
+  { key: "husk_alert_threshold_bags", label: "Husk Alert Threshold",         description: "Alert when husk stock falls below this many bags", unit: "bags" },
+  { key: "milling_target_rate",       label: "Milling Target Rate",          description: "Target milling conversion rate percentage", unit: "%" },
 ];
 
 function fmtDate(iso: string) {
