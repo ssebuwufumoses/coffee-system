@@ -165,13 +165,11 @@ export default function FarmerProfilePage() {
               setPaymentForm(f => ({ ...f, paymentMethod: preferenceToMethod[farmer.paymentPreference] ?? "CASH" }));
               setShowPaymentModal(true);
             }}>
-              <Banknote className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Record </span>Payment
+              <Banknote className="h-4 w-4 mr-1" />Record Payment
             </Button>
             {stats.husksBalanceBags > 0 && (
               <Button size="sm" onClick={() => setShowIssueModal(true)}>
-                <Leaf className="h-4 w-4 mr-1" />
-                <span className="hidden sm:inline">Issue </span>Husks
+                <Leaf className="h-4 w-4 mr-1" />Issue Husks
               </Button>
             )}
           </div>
