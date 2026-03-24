@@ -42,25 +42,35 @@ export async function POST(request: NextRequest) {
     const created: string[] = [];
 
     for (const item of correct) {
-      // Find existing item with same category + variety
-      const existing = await prisma.inventoryItem.findFirst({
-        where: { category: item.category, coffeeVarietyId: item.coffeeVarietyId },
-      });
-
-      if (existing) {
-        // Update name and threshold to correct values
+      // 1. Find by exact name — fix its variety/category if wrong
+      const byName = await prisma.inventoryItem.findFirst({ where: { name: item.name } });
+      if (byName) {
         await prisma.inventoryItem.update({
-          where: { id: existing.id },
-          data: { name: item.name, lowStockAlertKg: item.lowStockAlertKg },
+          where: { id: byName.id },
+          data: { category: item.category, coffeeVarietyId: item.coffeeVarietyId, lowStockAlertKg: item.lowStockAlertKg },
         });
         updated.push(item.name);
-      } else {
-        // Create new item with 0 stock
-        await prisma.inventoryItem.create({
-          data: { ...item, currentStockKg: 0 },
-        });
-        created.push(item.name);
+        continue;
       }
+
+      // 2. Find by category + variety — rename it to the correct name
+      const byVariety = await prisma.inventoryItem.findFirst({
+        where: { category: item.category, coffeeVarietyId: item.coffeeVarietyId },
+      });
+      if (byVariety) {
+        await prisma.inventoryItem.update({
+          where: { id: byVariety.id },
+          data: { name: item.name, lowStockAlertKg: item.lowStockAlertKg },
+        });
+        updated.push(`${byVariety.name} → ${item.name}`);
+        continue;
+      }
+
+      // 3. Neither found — create fresh
+      await prisma.inventoryItem.create({
+        data: { ...item, currentStockKg: 0 },
+      });
+      created.push(item.name);
     }
 
     return NextResponse.json({ updated, created, message: "Inventory setup complete." });
