@@ -69,21 +69,28 @@ export default function DeliveryReceiptPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       {/* Actions bar — hidden on print */}
-      <div className="flex items-center justify-between print:hidden">
-        <Link href="/intake">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            All Deliveries
-          </Button>
-        </Link>
-        <div className="flex gap-2">
-          <Link href={`/farmers/${delivery.farmer.id}`}>
-            <Button variant="outline" size="sm">View Farmer Profile</Button>
+      <div className="print:hidden space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <Link href="/intake">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-1.5" />
+              All Deliveries
+            </Button>
           </Link>
-          <Button size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4 mr-2" />
-            Print Receipt
-          </Button>
+          <div className="flex gap-2">
+            <Link href={`/farmers/${delivery.farmer.id}`}>
+              <Button variant="outline" size="sm">
+                <User className="h-3.5 w-3.5 mr-1.5 sm:hidden" />
+                <span className="hidden sm:inline">View Farmer Profile</span>
+                <span className="sm:hidden">Profile</span>
+              </Button>
+            </Link>
+            <Button size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Print Receipt</span>
+              <span className="sm:hidden">Print</span>
+            </Button>
+          </div>
         </div>
       </div>
 

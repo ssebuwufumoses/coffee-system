@@ -122,17 +122,16 @@ export default function DeliveriesPage() {
                         <div className="text-xs text-gray-400">{d.farmer.farmerCode}</div>
                       </Link>
                       {/* Date + variety + status — mobile sub-text */}
-                      <div className="sm:hidden mt-1 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] text-gray-400">{formatDate(d.deliveryDate)}</span>
-                        <span className="text-[10px] text-gray-400">·</span>
-                        <span className="text-[10px] text-gray-500">{d.coffeeVariety.name}</span>
-                        <span className="text-[10px] text-gray-400">·</span>
+                      <div className="sm:hidden mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                        <span className="text-[11px] text-gray-400">{formatDate(d.deliveryDate)}</span>
+                        <span className="text-[11px] text-gray-300">·</span>
+                        <span className="text-[11px] text-gray-500">{d.coffeeVariety.name}</span>
                         {d.status === "MILLED" ? (
-                          <span className="text-[10px] font-semibold text-success">✓ Milled</span>
+                          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-success bg-success/10 rounded px-1.5 py-0.5">✓ Milled</span>
                         ) : d.status === "IN_PROGRESS" ? (
-                          <span className="text-[10px] font-semibold text-primary">⚙ Milling</span>
+                          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-primary bg-primary/10 rounded px-1.5 py-0.5">⚙ Milling</span>
                         ) : (
-                          <span className="text-[10px] font-semibold text-warning">⏳ Pending</span>
+                          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-warning bg-warning/10 rounded px-1.5 py-0.5">⏳ Pending</span>
                         )}
                       </div>
                     </td>
