@@ -146,14 +146,14 @@ export default function SalesPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
-                <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Order</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Buyer</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Order</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Buyer</th>
                 <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Variety</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Qty</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">Total</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Status</th>
+                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Status</th>
                 <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden xl:table-cell">Date</th>
-                <th scope="col" className="px-5 py-3" />
+                <th scope="col" className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F0F0F0]">
@@ -164,11 +164,22 @@ export default function SalesPage() {
 
                 return (
                   <tr key={order.id} className="hover:bg-[#F9F9F9] transition-colors">
-                    <td className="px-5 py-3.5">
-                      <p className="font-bold text-[#1D1D1D]">{order.orderNumber}</p>
-                      <p className="text-xs text-[#9B9B9B] mt-0.5">by {order.createdBy.name}</p>
-                    </td>
                     <td className="px-4 py-3.5">
+                      <p className="font-mono text-xs font-bold text-[#240C64]">{order.orderNumber}</p>
+                      <p className="text-xs text-[#9B9B9B] mt-0.5">by {order.createdBy.name}</p>
+                      {/* Mobile sub-text: buyer + date + status */}
+                      <div className="sm:hidden mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs font-medium text-[#1D1D1D]">{order.buyer.companyName}</span>
+                        <span className="text-[11px] text-[#9B9B9B]">· {fmtDate(order.createdAt)}</span>
+                        <span
+                          className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border"
+                          style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}
+                        >
+                          {sc.label}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 hidden sm:table-cell">
                       <p className="font-medium text-[#1D1D1D]">{order.buyer.companyName}</p>
                       <p className="text-xs text-[#9B9B9B] mt-0.5">
                         {order.buyer.buyerType === "EXPORTER" ? "Exporter" : "Local Trader"}
@@ -197,7 +208,7 @@ export default function SalesPage() {
                         </p>
                       )}
                     </td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-4 py-3.5 text-center hidden sm:table-cell">
                       <span
                         className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border"
                         style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}
@@ -208,7 +219,7 @@ export default function SalesPage() {
                     <td className="px-4 py-3.5 hidden xl:table-cell text-[#9B9B9B] text-xs">
                       {fmtDate(order.createdAt)}
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <Link
                         href={`/sales/${order.id}`}
                         className="text-xs font-semibold text-[#240C64] hover:underline"
