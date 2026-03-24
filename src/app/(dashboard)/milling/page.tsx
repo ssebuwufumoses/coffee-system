@@ -155,8 +155,8 @@ export default function MillingPage() {
               <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Batch</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Owner(s)</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden md:table-cell">Coffee</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Status</th>
-              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide">Input (kg)</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Status</th>
+              <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden sm:table-cell">Input (kg)</th>
               <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden md:table-cell">Beans Out</th>
               <th className="text-right px-4 py-3 font-semibold text-gray-500 uppercase text-xs tracking-wide hidden lg:table-cell">Rate %</th>
               <th className="px-4 py-3"></th>
@@ -178,22 +178,40 @@ export default function MillingPage() {
               batches.map(b => (
                 <tr key={b.id} className="border-b border-surface-secondary last:border-0 hover:bg-surface-primary/50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-mono text-sm font-medium text-primary">{b.batchNumber}</p>
-                    {/* Owner sub-text — visible on mobile only */}
+                    <p className="font-mono text-xs font-semibold text-primary">{b.batchNumber}</p>
+                    {/* Mobile sub-text: owner */}
                     <p className="text-xs text-gray-600 mt-0.5 sm:hidden flex items-center gap-1">
                       {b.batchType === "GROUP" ? (
                         <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3 text-primary inline" />
+                          <Users className="h-3 w-3 text-primary" />
                           {b.owners.length} members
                         </span>
                       ) : (
                         <span className="flex items-center gap-1">
-                          <User className="h-3 w-3 text-gray-400 inline" />
+                          <User className="h-3 w-3 text-gray-400" />
                           {b.owners[0]?.farmer.name ?? "—"}
                         </span>
                       )}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    {/* Mobile sub-text: date + status + input */}
+                    <div className="sm:hidden mt-1 flex flex-wrap items-center gap-1.5">
+                      <span className="text-[11px] text-gray-400">
+                        {new Date(b.milledDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
+                      </span>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_STYLES[b.status]}`}>
+                        {STATUS_LABELS[b.status]}
+                      </span>
+                      <span className="text-[11px] font-semibold text-deepest">
+                        {parseFloat(b.inputRawKg).toLocaleString()} kg
+                      </span>
+                      {b.conversionRatePct && (
+                        <span className="text-[11px] font-medium text-success">
+                          {parseFloat(b.conversionRatePct).toFixed(1)}%
+                        </span>
+                      )}
+                    </div>
+                    {/* Desktop: date only */}
+                    <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">
                       {new Date(b.milledDate).toLocaleDateString("en-UG", { day: "2-digit", month: "short", year: "numeric" })}
                     </p>
                   </td>
@@ -221,12 +239,12 @@ export default function MillingPage() {
                   <td className="px-4 py-3 hidden md:table-cell">
                     <Badge variant="muted">{b.coffeeVariety.name}</Badge>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 hidden sm:table-cell">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[b.status]}`}>
                       {STATUS_LABELS[b.status]}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold text-deepest">
+                  <td className="px-4 py-3 text-right font-semibold text-deepest hidden sm:table-cell">
                     {parseFloat(b.inputRawKg).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-600 hidden md:table-cell">
