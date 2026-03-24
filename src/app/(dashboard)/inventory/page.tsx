@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Package, AlertTriangle, Coffee, Leaf, Scale,
   ArrowUpRight, ArrowDownRight, RefreshCw, Activity, Plus, X, SlidersHorizontal,
+  Pencil, Trash2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -14,6 +15,7 @@ interface InventoryItem {
   category: "RAW_COFFEE" | "PROCESSED_BEANS" | "HUSKS" | "PACKAGING" | "OTHER";
   currentStockKg: string;
   lowStockAlertKg: string | null;
+  coffeeVarietyId: string | null;
   coffeeVariety: { name: string; code: string } | null;
 }
 
@@ -93,7 +95,11 @@ function SummaryCard({
 
 // ─── Stock card — Cloudflare style ───────────────────────────────────────────
 
-function StockCard({ item }: { item: InventoryItem }) {
+function StockCard({ item, onEdit, onDelete }: {
+  item: InventoryItem;
+  onEdit?: () => void;
+  onDelete?: () => void;
+}) {
   const cat = CAT[item.category as keyof typeof CAT] ?? CAT.OTHER;
   const { Icon } = cat;
   const stock = parseFloat(item.currentStockKg);
@@ -168,13 +174,42 @@ function StockCard({ item }: { item: InventoryItem }) {
       ) : (
         <p className="text-xs text-[#9B9B9B] mt-auto">No threshold set</p>
       )}
+
+      {/* Edit / Delete actions */}
+      {(onEdit || onDelete) && (
+        <div className="flex items-center justify-end gap-1 pt-2 border-t border-[#F0F0F0] mt-1">
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[#6B6B6B] hover:bg-[#F3F3F3] hover:text-[#240C64] transition-colors"
+            >
+              <Pencil className="h-3 w-3" /> Edit
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-[#6B6B6B] hover:bg-red-50 hover:text-red-600 transition-colors"
+            >
+              <Trash2 className="h-3 w-3" /> Delete
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Category section ─────────────────────────────────────────────────────────
 
-function CategorySection({ category, items }: { category: string; items: InventoryItem[] }) {
+function CategorySection({ category, items, onEdit, onDelete }: {
+  category: string;
+  items: InventoryItem[];
+  onEdit?: (item: InventoryItem) => void;
+  onDelete?: (item: InventoryItem) => void;
+}) {
   const cat = CAT[category as keyof typeof CAT] ?? CAT.OTHER;
   const { Icon } = cat;
   const totalKg = items.reduce((s, i) => s + parseFloat(i.currentStockKg), 0);
@@ -203,7 +238,14 @@ function CategorySection({ category, items }: { category: string; items: Invento
         )}
       </div>
       <div className="grid grid-cols-1 gap-3">
-        {items.map(item => <StockCard key={item.id} item={item} />)}
+        {items.map(item => (
+          <StockCard
+            key={item.id}
+            item={item}
+            onEdit={onEdit ? () => onEdit(item) : undefined}
+            onDelete={onDelete ? () => onDelete(item) : undefined}
+          />
+        ))}
       </div>
     </section>
   );
@@ -243,6 +285,17 @@ export default function InventoryPage() {
   const [adjLoading, setAdjLoading] = useState(false);
   const [adjError, setAdjError] = useState("");
 
+  // Edit item modal
+  const [editItem, setEditItem] = useState<InventoryItem | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", category: "RAW_COFFEE", coffeeVarietyId: "", lowStockAlertKg: "" });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  // Delete confirmation modal
+  const [deleteItem, setDeleteItem] = useState<InventoryItem | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
   const loadAll = useCallback(async (silent = false) => {
     if (silent) setRefreshing(true); else setLoading(true);
     try {
@@ -279,6 +332,46 @@ export default function InventoryPage() {
       setAdjForm({ inventoryItemId: "", direction: "IN", quantityKg: "", notes: "" });
       await loadAll(true);
     } finally { setAdjLoading(false); }
+  }
+
+  function openEdit(item: InventoryItem) {
+    setEditItem(item);
+    setEditForm({
+      name: item.name,
+      category: item.category,
+      coffeeVarietyId: item.coffeeVarietyId ?? "",
+      lowStockAlertKg: item.lowStockAlertKg ?? "",
+    });
+    setEditError("");
+  }
+
+  async function submitEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editItem) return;
+    setEditError(""); setEditLoading(true);
+    try {
+      const res = await fetch(`/api/inventory/${editItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      const data = await res.json();
+      if (!res.ok) { setEditError(data.error ?? "Failed to update item"); return; }
+      setEditItem(null);
+      await loadAll(true);
+    } finally { setEditLoading(false); }
+  }
+
+  async function submitDelete() {
+    if (!deleteItem) return;
+    setDeleteError(""); setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/inventory/${deleteItem.id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) { setDeleteError(data.error ?? "Failed to delete item"); return; }
+      setDeleteItem(null);
+      await loadAll(true);
+    } finally { setDeleteLoading(false); }
   }
 
   async function submitAdd(e: React.FormEvent) {
@@ -410,7 +503,13 @@ export default function InventoryPage() {
           {/* Category sections */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {grouped.map(({ category, items: catItems }) => (
-              <CategorySection key={category} category={category} items={catItems} />
+              <CategorySection
+                key={category}
+                category={category}
+                items={catItems}
+                onEdit={openEdit}
+                onDelete={(item) => { setDeleteItem(item); setDeleteError(""); }}
+              />
             ))}
           </div>
         </>
@@ -628,6 +727,136 @@ export default function InventoryPage() {
       )}
 
       {/* ── Add Inventory Item Modal ─────────────────────────────────────── */}
+      {/* ── Edit Inventory Item Modal ────────────────────────────────────── */}
+      {editItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-xl border border-[#E8E8E8] w-full max-w-md shadow-xl">
+            <div className="px-5 py-4 border-b border-[#F0F0F0] flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-[#1D1D1D]">Edit Inventory Item</h3>
+                <p className="text-xs text-[#9B9B9B] mt-0.5">Update item details — stock level is unchanged</p>
+              </div>
+              <button onClick={() => setEditItem(null)} className="text-[#9B9B9B] hover:text-[#1D1D1D] transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={submitEdit} className="px-5 py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#1D1D1D] mb-1.5">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  value={editForm.category}
+                  onChange={e => setEditForm(f => ({ ...f, category: e.target.value, coffeeVarietyId: "" }))}
+                  className="w-full rounded-lg border border-[#E8E8E8] px-3 py-2 text-sm text-[#1D1D1D] focus:outline-none focus:ring-2 focus:ring-[#240C64] focus:border-transparent"
+                >
+                  {CATEGORY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+
+              {VARIETY_CATEGORIES.includes(editForm.category) && (
+                <div>
+                  <label className="block text-sm font-medium text-[#1D1D1D] mb-1.5">
+                    Coffee Variety <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    required
+                    value={editForm.coffeeVarietyId}
+                    onChange={e => setEditForm(f => ({ ...f, coffeeVarietyId: e.target.value }))}
+                    className="w-full rounded-lg border border-[#E8E8E8] px-3 py-2 text-sm text-[#1D1D1D] focus:outline-none focus:ring-2 focus:ring-[#240C64] focus:border-transparent"
+                  >
+                    <option value="">Select variety…</option>
+                    {varieties.map(v => <option key={v.id} value={v.id}>{v.name} ({v.code})</option>)}
+                  </select>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-[#1D1D1D] mb-1.5">
+                  Item Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.name}
+                  onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                  className="w-full rounded-lg border border-[#E8E8E8] px-3 py-2 text-sm text-[#1D1D1D] placeholder-[#BABABA] focus:outline-none focus:ring-2 focus:ring-[#240C64] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1D1D1D] mb-1.5">
+                  Low Stock Alert Threshold (kg)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 500"
+                  value={editForm.lowStockAlertKg}
+                  onChange={e => setEditForm(f => ({ ...f, lowStockAlertKg: e.target.value }))}
+                  className="w-full rounded-lg border border-[#E8E8E8] px-3 py-2 text-sm text-[#1D1D1D] placeholder-[#BABABA] focus:outline-none focus:ring-2 focus:ring-[#240C64] focus:border-transparent"
+                />
+                <p className="text-xs text-[#9B9B9B] mt-1">Leave blank to remove the alert threshold.</p>
+              </div>
+
+              {editError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{editError}</p>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setEditItem(null)} className="rounded-lg border border-[#E8E8E8] px-4 py-2 text-sm font-medium text-[#6B6B6B] hover:bg-[#F6F6F6] transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={editLoading} className="rounded-lg bg-[#240C64] px-5 py-2 text-sm font-semibold text-white hover:bg-[#1a0948] transition-colors disabled:opacity-50">
+                  {editLoading ? "Saving…" : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ─────────────────────────────────────── */}
+      {deleteItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+          <div className="bg-white rounded-xl border border-[#E8E8E8] w-full max-w-sm shadow-xl">
+            <div className="px-5 py-4 border-b border-[#F0F0F0] flex items-center justify-between">
+              <h3 className="font-bold text-[#1D1D1D]">Delete Item</h3>
+              <button onClick={() => setDeleteItem(null)} className="text-[#9B9B9B] hover:text-[#1D1D1D] transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="px-5 py-4 space-y-4">
+              <p className="text-sm text-[#3D3D3D]">
+                Are you sure you want to delete <span className="font-semibold">{deleteItem.name}</span>?
+                This cannot be undone.
+              </p>
+              <p className="text-xs text-[#9B9B9B]">
+                Items with existing stock or movement history cannot be deleted.
+              </p>
+              {deleteError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{deleteError}</p>
+              )}
+              <div className="flex justify-end gap-3 pt-1">
+                <button type="button" onClick={() => setDeleteItem(null)} className="rounded-lg border border-[#E8E8E8] px-4 py-2 text-sm font-medium text-[#6B6B6B] hover:bg-[#F6F6F6] transition-colors">
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={submitDelete}
+                  disabled={deleteLoading}
+                  className="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deleteLoading ? "Deleting…" : "Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
           <div className="bg-white rounded-xl border border-[#E8E8E8] w-full max-w-md shadow-xl">
