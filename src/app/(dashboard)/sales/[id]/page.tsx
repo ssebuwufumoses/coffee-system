@@ -89,26 +89,58 @@ function Timeline({ status }: { status: string }) {
   }
   const currentIdx = STEPS.indexOf(status);
   return (
-    <div className="flex items-center gap-1">
-      {STEPS.map((step, i) => {
-        const done = i < currentIdx;
-        const active = i === currentIdx;
-        const sc = STATUS_CONFIG[step];
-        return (
-          <div key={step} className="flex items-center gap-1 flex-1 min-w-0">
-            <div className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border flex-1 justify-center ${
-              active ? "border-[#240C64] bg-[#240C64] text-white" :
-              done ? "border-emerald-200 bg-emerald-50 text-emerald-700" :
-              "border-[#E8E8E8] bg-[#F6F6F6] text-[#9B9B9B]"
-            }`}>
-              {done && <CheckCircle2 className="h-3 w-3 flex-shrink-0" />}
-              <span className="truncate">{sc.label}</span>
+    <>
+      {/* Mobile: dot stepper */}
+      <div className="sm:hidden flex items-center gap-1">
+        {STEPS.map((step, i) => {
+          const done = i < currentIdx;
+          const active = i === currentIdx;
+          const sc = STATUS_CONFIG[step];
+          return (
+            <div key={step} className="flex items-center gap-1 flex-1 min-w-0">
+              <div className={`flex-1 flex flex-col items-center gap-0.5`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+                  active ? "border-[#240C64] bg-[#240C64]" :
+                  done ? "border-emerald-500 bg-emerald-500" :
+                  "border-[#E8E8E8] bg-white"
+                }`}>
+                  {done ? <CheckCircle2 className="h-3 w-3 text-white" /> :
+                   active ? <div className="w-2 h-2 rounded-full bg-white" /> :
+                   <div className="w-2 h-2 rounded-full bg-[#E8E8E8]" />}
+                </div>
+                <span className={`text-[9px] font-semibold text-center leading-tight ${
+                  active ? "text-[#240C64]" : done ? "text-emerald-700" : "text-[#9B9B9B]"
+                }`}>{sc.label}</span>
+              </div>
+              {i < STEPS.length - 1 && (
+                <div className={`h-0.5 flex-1 mb-3.5 ${done ? "bg-emerald-400" : "bg-[#E8E8E8]"}`} />
+              )}
             </div>
-            {i < STEPS.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-[#CBCBCB] flex-shrink-0" />}
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+      {/* Desktop: full pill row */}
+      <div className="hidden sm:flex items-center gap-1">
+        {STEPS.map((step, i) => {
+          const done = i < currentIdx;
+          const active = i === currentIdx;
+          const sc = STATUS_CONFIG[step];
+          return (
+            <div key={step} className="flex items-center gap-1 flex-1 min-w-0">
+              <div className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border flex-1 justify-center ${
+                active ? "border-[#240C64] bg-[#240C64] text-white" :
+                done ? "border-emerald-200 bg-emerald-50 text-emerald-700" :
+                "border-[#E8E8E8] bg-[#F6F6F6] text-[#9B9B9B]"
+              }`}>
+                {done && <CheckCircle2 className="h-3 w-3 flex-shrink-0" />}
+                <span className="truncate">{sc.label}</span>
+              </div>
+              {i < STEPS.length - 1 && <ChevronRight className="h-3.5 w-3.5 text-[#CBCBCB] flex-shrink-0" />}
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -271,38 +303,42 @@ export default function SaleOrderDetailPage() {
         <Link href="/sales" className="inline-flex items-center gap-1.5 text-sm text-[#6B6B6B] hover:text-[#1D1D1D] mb-3 transition-colors">
           <ArrowLeft className="h-4 w-4" /> Back to Sales
         </Link>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-extrabold text-[#1D1D1D]">{order.orderNumber}</h1>
-              <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border" style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}>{sc.label}</span>
+        <div className="flex flex-col gap-3">
+          {/* Title row */}
+          <div className="flex items-start justify-between gap-2 min-w-0">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="font-extrabold text-[#1D1D1D] text-xl sm:text-2xl break-all">{order.orderNumber}</h1>
+                <span className="inline-flex flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold border" style={{ backgroundColor: sc.bg, color: sc.text, borderColor: sc.border }}>{sc.label}</span>
+              </div>
+              <p className="text-sm text-[#9B9B9B] mt-0.5">Created {fmtDate(order.createdAt)} by {order.createdBy.name}</p>
             </div>
-            <p className="text-sm text-[#9B9B9B] mt-0.5">Created {fmtDate(order.createdAt)} by {order.createdBy.name}</p>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Action buttons — full-width row, wraps on mobile */}
+          <div className="flex flex-wrap gap-2">
             {order.status === "DRAFT" && (
               <>
-                <button onClick={() => { closeAll(); setShowCancel(true); }} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">
+                <button onClick={() => { closeAll(); setShowCancel(true); }} className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-100 transition-colors">
                   <XCircle className="h-3.5 w-3.5" /> Cancel Order
                 </button>
-                <button onClick={() => { closeAll(); setShowConfirm(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
+                <button onClick={() => { closeAll(); setShowConfirm(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
                   <CheckCircle2 className="h-3.5 w-3.5" /> Confirm Order
                 </button>
               </>
             )}
             {order.status === "CONFIRMED" && (
-              <button onClick={() => { closeAll(); setShowDispatch(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
+              <button onClick={() => { closeAll(); setShowDispatch(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
                 <Truck className="h-3.5 w-3.5" /> Record Dispatch
               </button>
             )}
             {order.status === "DISPATCHED" && (
-              <button onClick={() => { closeAll(); setShowInvoice(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
+              <button onClick={() => { closeAll(); setShowInvoice(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
                 <FileText className="h-3.5 w-3.5" /> Create Invoice
               </button>
             )}
             {order.status === "INVOICED" && (
-              <button onClick={() => { closeAll(); setShowPayment(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
+              <button onClick={() => { closeAll(); setShowPayment(true); }} className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors">
                 <CreditCard className="h-3.5 w-3.5" /> Record Payment
               </button>
             )}
@@ -410,8 +446,13 @@ export default function SaleOrderDetailPage() {
             <tbody className="divide-y divide-[#F0F0F0]">
               {order.dispatches.map(d => (
                 <tr key={d.id} className="hover:bg-[#F9F9F9] transition-colors">
-                  <td className="px-5 py-3.5 font-bold text-[#1D1D1D]">{d.gatePassNumber}</td>
-                  <td className="px-4 py-3.5 text-right font-semibold text-[#1D1D1D]">{fmtKg(d.dispatchedKg)}</td>
+                  <td className="px-5 py-3.5 align-top">
+                    <p className="font-bold text-[#1D1D1D]">{d.gatePassNumber}</p>
+                    <p className="text-[11px] text-[#9B9B9B] mt-0.5 md:hidden">{fmtDateTime(d.dispatchDate)}</p>
+                    {d.truckRegistration && <p className="text-[11px] text-[#9B9B9B] lg:hidden">{d.truckRegistration}</p>}
+                    <p className="text-[11px] text-[#9B9B9B] md:hidden">by {d.dispatchedBy.name}</p>
+                  </td>
+                  <td className="px-4 py-3.5 text-right font-semibold text-[#1D1D1D] align-top">{fmtKg(d.dispatchedKg)}</td>
                   <td className="px-4 py-3.5 text-[#6B6B6B] hidden md:table-cell">{fmtDateTime(d.dispatchDate)}</td>
                   <td className="px-4 py-3.5 text-[#6B6B6B] hidden lg:table-cell">
                     <div>{d.truckRegistration ?? "—"}</div>
@@ -439,12 +480,19 @@ export default function SaleOrderDetailPage() {
       {invoice && (
         <div className="bg-white rounded-lg border border-[#E8E8E8] overflow-hidden">
           <div className="px-5 py-4 border-b border-[#E8E8E8]">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-[#9B9B9B]" aria-hidden="true" />
                 <h2 className="text-sm font-bold text-[#1D1D1D]">Invoice {invoice.invoiceNumber}</h2>
+                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
+                  invoice.paymentStatus === "FULLY_PAID" ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  : invoice.paymentStatus === "PARTIALLY_PAID" ? "bg-amber-50 border-amber-200 text-amber-700"
+                  : "bg-[#F6F6F6] border-[#E8E8E8] text-[#6B6B6B]"
+                }`}>
+                  {invoice.paymentStatus === "FULLY_PAID" ? "Fully Paid" : invoice.paymentStatus === "PARTIALLY_PAID" ? "Partially Paid" : "Unpaid"}
+                </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 {invoice.paymentStatus === "FULLY_PAID" && (
                   <Link href={`/sales/${id}/invoice/print`} target="_blank"
                     className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition-colors whitespace-nowrap">
@@ -455,13 +503,6 @@ export default function SaleOrderDetailPage() {
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#240C64] px-3 py-1.5 text-xs font-semibold text-[#240C64] hover:bg-[#240C64] hover:text-white transition-colors whitespace-nowrap">
                   <Printer className="h-3.5 w-3.5" /> Print Invoice
                 </Link>
-                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
-                invoice.paymentStatus === "FULLY_PAID" ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                : invoice.paymentStatus === "PARTIALLY_PAID" ? "bg-amber-50 border-amber-200 text-amber-700"
-                : "bg-[#F6F6F6] border-[#E8E8E8] text-[#6B6B6B]"
-              }`}>
-                {invoice.paymentStatus === "FULLY_PAID" ? "Fully Paid" : invoice.paymentStatus === "PARTIALLY_PAID" ? "Partially Paid" : "Unpaid"}
-                </span>
               </div>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
