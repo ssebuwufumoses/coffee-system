@@ -57,7 +57,7 @@ export async function DELETE(
     );
   }
 
-  const movementCount = await prisma.stockMovement.count({ where: { inventoryItemId: id } });
+  const movementCount = await prisma.inventoryMovement.count({ where: { inventoryItemId: id } });
   if (movementCount > 0) {
     return NextResponse.json(
       { error: "Cannot delete: item has stock movement history and cannot be removed." },
