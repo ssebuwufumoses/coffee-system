@@ -136,8 +136,8 @@ function SalesReport({ from, to }: { from: string; to: string }) {
           <thead>
             <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
               <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Buyer</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Orders</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Volume</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Orders</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Volume</th>
               <th scope="col" className="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Revenue</th>
             </tr>
           </thead>
@@ -146,9 +146,12 @@ function SalesReport({ from, to }: { from: string; to: string }) {
               <tr><td colSpan={4} className="text-center py-8 text-sm text-[#9B9B9B]">No data for selected period</td></tr>
             ) : byBuyer.map((b: any) => (
               <tr key={b.buyerName} className="hover:bg-[#F9F9F9]">
-                <td className="px-5 py-3 font-semibold text-[#1D1D1D]">{b.buyerName}</td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{b.orders}</td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{fmtKg(b.totalKg)}</td>
+                <td className="px-5 py-3">
+                  <p className="font-semibold text-[#1D1D1D]">{b.buyerName}</p>
+                  <p className="text-xs text-[#9B9B9B] mt-0.5 sm:hidden">{b.orders} order{b.orders !== 1 ? "s" : ""} · {fmtKg(b.totalKg)}</p>
+                </td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{b.orders}</td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{fmtKg(b.totalKg)}</td>
                 <td className="px-5 py-3 text-right font-bold text-[#1D1D1D]">{fmtUgx(b.totalRevenue)}</td>
               </tr>
             ))}
@@ -157,8 +160,8 @@ function SalesReport({ from, to }: { from: string; to: string }) {
             <tfoot>
               <tr className="border-t-2 border-[#E8E8E8]">
                 <td className="px-5 py-3 font-bold text-[#1D1D1D]">Total</td>
-                <td className="px-4 py-3 text-right font-bold text-[#1D1D1D]">{summary.totalOrders}</td>
-                <td className="px-4 py-3 text-right font-bold text-[#1D1D1D]">{fmtKg(summary.totalKg)}</td>
+                <td className="px-4 py-3 text-right font-bold text-[#1D1D1D] hidden sm:table-cell">{summary.totalOrders}</td>
+                <td className="px-4 py-3 text-right font-bold text-[#1D1D1D] hidden sm:table-cell">{fmtKg(summary.totalKg)}</td>
                 <td className="px-5 py-3 text-right font-bold text-[#240C64]">{fmtUgx(summary.totalRevenue)}</td>
               </tr>
             </tfoot>
@@ -172,17 +175,20 @@ function SalesReport({ from, to }: { from: string; to: string }) {
           <thead>
             <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
               <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Variety</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Orders</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Volume</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Orders</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Volume</th>
               <th scope="col" className="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Revenue</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#F0F0F0]">
             {byVariety.map((v: any) => (
               <tr key={v.variety} className="hover:bg-[#F9F9F9]">
-                <td className="px-5 py-3 font-semibold text-[#1D1D1D]">{v.variety} <span className="text-xs text-[#9B9B9B] font-normal">({v.code})</span></td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{v.orders}</td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{fmtKg(v.totalKg)}</td>
+                <td className="px-5 py-3">
+                  <p className="font-semibold text-[#1D1D1D]">{v.variety} <span className="text-xs text-[#9B9B9B] font-normal">({v.code})</span></p>
+                  <p className="text-xs text-[#9B9B9B] mt-0.5 sm:hidden">{v.orders} order{v.orders !== 1 ? "s" : ""} · {fmtKg(v.totalKg)}</p>
+                </td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{v.orders}</td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{fmtKg(v.totalKg)}</td>
                 <td className="px-5 py-3 text-right font-bold text-[#1D1D1D]">{fmtUgx(v.totalRevenue)}</td>
               </tr>
             ))}
@@ -202,7 +208,7 @@ function SalesReport({ from, to }: { from: string; to: string }) {
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Volume</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Amount</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Outstanding</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Status</th>
+                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Status</th>
                 <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Date</th>
               </tr>
             </thead>
@@ -213,19 +219,24 @@ function SalesReport({ from, to }: { from: string; to: string }) {
                 const sc = STATUS_CONFIG[o.status] ?? STATUS_CONFIG.DRAFT;
                 return (
                   <tr key={o.id} className="hover:bg-[#F9F9F9]">
-                    <td className="px-5 py-3">
-                      <Link href={`/sales/${o.id}`} className="font-bold text-[#240C64] hover:underline">{o.orderNumber}</Link>
+                    <td className="px-5 py-3 align-top">
+                      <Link href={`/sales/${o.id}`} className="font-bold text-[#240C64] hover:underline font-mono text-xs">{o.orderNumber}</Link>
+                      <p className="text-xs text-[#9B9B9B] mt-0.5 md:hidden">{o.buyer}</p>
+                      <div className="mt-1 md:hidden">
+                        <span className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border"
+                          style={{ background: sc.bg, color: sc.text, borderColor: sc.border }}>{sc.label}</span>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-[#6B6B6B] hidden md:table-cell">{o.buyer}</td>
                     <td className="px-4 py-3 text-[#6B6B6B] hidden lg:table-cell">{o.variety}</td>
-                    <td className="px-4 py-3 text-right text-[#6B6B6B]">{fmtKg(o.quantityKg)}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-[#1D1D1D]">{fmtUgx(o.totalAmountUgx)}</td>
+                    <td className="px-4 py-3 text-right text-[#6B6B6B] align-top">{fmtKg(o.quantityKg)}</td>
+                    <td className="px-4 py-3 text-right font-semibold text-[#1D1D1D] align-top">{fmtUgx(o.totalAmountUgx)}</td>
                     <td className="px-4 py-3 text-right hidden md:table-cell">
                       <span className={o.outstandingUgx > 0 ? "text-red-700 font-semibold" : "text-emerald-700 font-semibold"}>
                         {o.outstandingUgx > 0 ? fmtUgx(o.outstandingUgx) : "Cleared"}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 hidden md:table-cell">
                       <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border"
                         style={{ background: sc.bg, color: sc.text, borderColor: sc.border }}>{sc.label}</span>
                     </td>
@@ -397,10 +408,10 @@ function MillingReport({ from, to }: { from: string; to: string }) {
           <thead>
             <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
               <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Variety</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Batches</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Input</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Beans Out</th>
-              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Husks Out</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Batches</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Input</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Beans Out</th>
+              <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Husks Out</th>
               <th scope="col" className="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Conversion</th>
             </tr>
           </thead>
@@ -409,11 +420,14 @@ function MillingReport({ from, to }: { from: string; to: string }) {
               <tr><td colSpan={6} className="text-center py-8 text-sm text-[#9B9B9B]">No completed batches</td></tr>
             ) : byVariety.map((v: any) => (
               <tr key={v.code} className="hover:bg-[#F9F9F9]">
-                <td className="px-5 py-3 font-semibold text-[#1D1D1D]">{v.name} <span className="text-xs text-[#9B9B9B]">({v.code})</span></td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{v.batches}</td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{fmtKg(v.inputKg)}</td>
-                <td className="px-4 py-3 text-right text-emerald-700 font-semibold">{fmtKg(v.beansKg)}</td>
-                <td className="px-4 py-3 text-right text-[#6B6B6B]">{fmtKg(v.husksKg)}</td>
+                <td className="px-5 py-3">
+                  <p className="font-semibold text-[#1D1D1D]">{v.name} <span className="text-xs text-[#9B9B9B] font-normal">({v.code})</span></p>
+                  <p className="text-xs text-[#9B9B9B] mt-0.5 sm:hidden">{v.batches} batch{v.batches !== 1 ? "es" : ""} · {fmtKg(v.inputKg)} in · {fmtKg(v.beansKg)} beans</p>
+                </td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{v.batches}</td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{fmtKg(v.inputKg)}</td>
+                <td className="px-4 py-3 text-right text-emerald-700 font-semibold hidden sm:table-cell">{fmtKg(v.beansKg)}</td>
+                <td className="px-4 py-3 text-right text-[#6B6B6B] hidden md:table-cell">{fmtKg(v.husksKg)}</td>
                 <td className="px-5 py-3 text-right font-bold text-[#240C64]">{v.avgConversion}%</td>
               </tr>
             ))}
@@ -428,7 +442,7 @@ function MillingReport({ from, to }: { from: string; to: string }) {
               <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
                 <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Batch</th>
                 <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Variety</th>
-                <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Input</th>
+                <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Input</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Beans</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Husks</th>
                 <th scope="col" className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Rate</th>
@@ -440,17 +454,19 @@ function MillingReport({ from, to }: { from: string; to: string }) {
                 const lowYield = b.conversionRate < 45;
                 return (
                   <tr key={b.id} className={lowYield ? "bg-red-50 hover:bg-red-100" : "hover:bg-[#F9F9F9]"}>
-                    <td className="px-5 py-3">
+                    <td className="px-5 py-3 align-top">
                       <div className="flex items-center gap-1.5">
-                        <Link href={`/milling/${b.id}`} className="font-bold text-[#240C64] hover:underline">{b.batchNumber}</Link>
+                        <Link href={`/milling/${b.id}`} className="font-bold text-[#240C64] hover:underline font-mono text-xs">{b.batchNumber}</Link>
                         {lowYield && <span title="Below 45% conversion"><AlertTriangle className="h-3.5 w-3.5 text-red-500" /></span>}
                       </div>
+                      <p className="text-[11px] text-[#9B9B9B] mt-0.5 sm:hidden">{b.variety}</p>
+                      <p className="text-[11px] text-[#9B9B9B] sm:hidden">{fmtKg(b.inputKg)} in</p>
                     </td>
                     <td className="px-4 py-3 text-[#6B6B6B] hidden sm:table-cell">{b.variety}</td>
-                    <td className="px-4 py-3 text-right text-[#6B6B6B]">{fmtKg(b.inputKg)}</td>
-                    <td className="px-4 py-3 text-right text-emerald-700 font-semibold">{fmtKg(b.beansKg)}</td>
+                    <td className="px-4 py-3 text-right text-[#6B6B6B] hidden sm:table-cell">{fmtKg(b.inputKg)}</td>
+                    <td className="px-4 py-3 text-right text-emerald-700 font-semibold align-top">{fmtKg(b.beansKg)}</td>
                     <td className="px-4 py-3 text-right text-[#6B6B6B] hidden md:table-cell">{fmtKg(b.husksKg)}</td>
-                    <td className={`px-4 py-3 text-right font-bold ${lowYield ? "text-red-600" : "text-[#240C64]"}`}>
+                    <td className={`px-4 py-3 text-right font-bold align-top ${lowYield ? "text-red-600" : "text-[#240C64]"}`}>
                       {b.conversionRate.toFixed(1)}%
                     </td>
                     <td className="px-5 py-3 text-[#9B9B9B] text-xs hidden md:table-cell">{fmtDate(b.createdAt)}</td>
