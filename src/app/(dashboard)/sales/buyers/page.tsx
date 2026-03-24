@@ -132,61 +132,34 @@ export default function BuyersPage() {
             </Link>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Company</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Contact</th>
-                <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">Location</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Type</th>
-                <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden sm:table-cell">Orders</th>
-                <th scope="col" className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#F0F0F0]">
+          <>
+            {/* ── Mobile card list (hidden sm+) ── */}
+            <div className="sm:hidden divide-y divide-[#F0F0F0]">
               {buyers.map(buyer => (
-                <tr key={buyer.id} className="hover:bg-[#F9F9F9] transition-colors">
-                  <td className="px-4 py-4 align-top">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#240C64]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Building2 className="h-4 w-4 text-[#240C64]" />
+                <div key={buyer.id} className="p-4">
+                  {/* Top row: icon + name + Edit */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-[#240C64]/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="h-5 w-5 text-[#240C64]" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-[#1D1D1D]">{buyer.companyName}</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-[#1D1D1D] leading-snug">{buyer.companyName}</p>
                         <p className="text-xs text-[#9B9B9B] flex items-center gap-1 mt-0.5">
-                          <Phone className="h-3 w-3" />{buyer.phone}
+                          <Phone className="h-3 w-3 flex-shrink-0" />{buyer.phone}
                         </p>
-                        {/* Mobile sub-text: type + order count */}
-                        <div className="sm:hidden mt-1.5 flex items-center gap-2">
-                          <span className={`whitespace-nowrap inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
-                            buyer.buyerType === "EXPORTER"
-                              ? "bg-[#240C64]/10 border-[#240C64]/20 text-[#240C64]"
-                              : "bg-[#F6F6F6] border-[#E8E8E8] text-[#6B6B6B]"
-                          }`}>
-                            {TYPE_LABELS[buyer.buyerType]}
-                          </span>
-                          <span className="whitespace-nowrap flex items-center gap-1 text-[11px] text-[#6B6B6B]">
-                            <ShoppingCart className="h-3 w-3 flex-shrink-0" />
-                            {buyer._count.saleOrders} order{buyer._count.saleOrders !== 1 ? "s" : ""}
-                          </span>
-                        </div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-4 py-4 hidden md:table-cell">
-                    <p className="text-[#1D1D1D]">{buyer.contactName}</p>
-                    {buyer.email && (
-                      <p className="text-xs text-[#9B9B9B] flex items-center gap-1 mt-0.5">
-                        <Mail className="h-3 w-3" />{buyer.email}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 hidden lg:table-cell">
-                    <p className="text-[#6B6B6B] flex items-center gap-1">
-                      <MapPin className="h-3.5 w-3.5" />{buyer.location}
-                    </p>
-                  </td>
-                  <td className="px-4 py-4 text-center hidden sm:table-cell">
+                    <button
+                      onClick={() => openEdit(buyer)}
+                      className="flex-shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-[#6B6B6B] hover:text-[#1D1D1D] transition-colors pt-0.5"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />Edit
+                    </button>
+                  </div>
+
+                  {/* Middle row: type badge + orders */}
+                  <div className="flex items-center gap-2 mt-2.5 pl-[52px]">
                     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
                       buyer.buyerType === "EXPORTER"
                         ? "bg-[#240C64]/10 border-[#240C64]/20 text-[#240C64]"
@@ -194,33 +167,102 @@ export default function BuyersPage() {
                     }`}>
                       {TYPE_LABELS[buyer.buyerType]}
                     </span>
-                  </td>
-                  <td className="px-4 py-4 text-center hidden sm:table-cell">
-                    <div className="flex items-center justify-center gap-1 text-[#6B6B6B]">
+                    <span className="flex items-center gap-1 text-xs text-[#9B9B9B]">
                       <ShoppingCart className="h-3.5 w-3.5" />
-                      <span className="font-semibold text-[#1D1D1D]">{buyer._count.saleOrders}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 align-top">
-                    <div className="flex items-center justify-end gap-3 pt-0.5">
-                      <button
-                        onClick={() => openEdit(buyer)}
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] hover:text-[#1D1D1D] transition-colors whitespace-nowrap"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />Edit
-                      </button>
-                      <Link
-                        href={`/sales/new?buyerId=${buyer.id}`}
-                        className="text-xs font-semibold text-[#240C64] hover:underline whitespace-nowrap"
-                      >
-                        New Order
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
+                      {buyer._count.saleOrders} order{buyer._count.saleOrders !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {/* Bottom row: New Order button */}
+                  <div className="mt-3 pl-[52px]">
+                    <Link
+                      href={`/sales/new?buyerId=${buyer.id}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#240C64] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#1a0948] transition-colors"
+                    >
+                      <Plus className="h-3.5 w-3.5" />New Order
+                    </Link>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ── Desktop table (hidden on mobile) ── */}
+            <table className="hidden sm:table w-full text-sm">
+              <thead>
+                <tr className="bg-[#F6F6F6] border-b border-[#E8E8E8]">
+                  <th scope="col" className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Company</th>
+                  <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden md:table-cell">Contact</th>
+                  <th scope="col" className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B] hidden lg:table-cell">Location</th>
+                  <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Type</th>
+                  <th scope="col" className="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#6B6B6B]">Orders</th>
+                  <th scope="col" className="px-5 py-3" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#F0F0F0]">
+                {buyers.map(buyer => (
+                  <tr key={buyer.id} className="hover:bg-[#F9F9F9] transition-colors">
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-[#240C64]/10 flex items-center justify-center flex-shrink-0">
+                          <Building2 className="h-4 w-4 text-[#240C64]" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-[#1D1D1D]">{buyer.companyName}</p>
+                          <p className="text-xs text-[#9B9B9B] flex items-center gap-1 mt-0.5">
+                            <Phone className="h-3 w-3" />{buyer.phone}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 hidden md:table-cell">
+                      <p className="text-[#1D1D1D]">{buyer.contactName}</p>
+                      {buyer.email && (
+                        <p className="text-xs text-[#9B9B9B] flex items-center gap-1 mt-0.5">
+                          <Mail className="h-3 w-3" />{buyer.email}
+                        </p>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 hidden lg:table-cell">
+                      <p className="text-[#6B6B6B] flex items-center gap-1">
+                        <MapPin className="h-3.5 w-3.5" />{buyer.location}
+                      </p>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
+                        buyer.buyerType === "EXPORTER"
+                          ? "bg-[#240C64]/10 border-[#240C64]/20 text-[#240C64]"
+                          : "bg-[#F6F6F6] border-[#E8E8E8] text-[#6B6B6B]"
+                      }`}>
+                        {TYPE_LABELS[buyer.buyerType]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <div className="flex items-center justify-center gap-1 text-[#6B6B6B]">
+                        <ShoppingCart className="h-3.5 w-3.5" />
+                        <span className="font-semibold text-[#1D1D1D]">{buyer._count.saleOrders}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => openEdit(buyer)}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6B6B6B] hover:text-[#1D1D1D] transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />Edit
+                        </button>
+                        <Link
+                          href={`/sales/new?buyerId=${buyer.id}`}
+                          className="text-xs font-semibold text-[#240C64] hover:underline"
+                        >
+                          New Order
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 
