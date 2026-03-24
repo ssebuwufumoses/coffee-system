@@ -315,7 +315,18 @@ export default function InventoryPage() {
     }
   }, []);
 
-  useEffect(() => { loadAll(); }, [loadAll]);
+  useEffect(() => {
+    loadAll().then(async () => {
+      // Auto-setup: if no inventory items exist yet, run setup silently
+      const res = await fetch("/api/inventory");
+      const data = await res.json();
+      const activeItems = (data.items ?? []).filter((i: InventoryItem) => i.category !== "OTHER");
+      if (activeItems.length === 0) {
+        await fetch("/api/admin/setup-inventory", { method: "POST" });
+        await loadAll(true);
+      }
+    });
+  }, [loadAll]);
 
   async function submitAdjust(e: React.FormEvent) {
     e.preventDefault();
@@ -391,8 +402,10 @@ export default function InventoryPage() {
     } finally { setAddLoading(false); }
   }
 
+  // Exclude OTHER (legacy/archived items) from the main stock view
   const grouped = Object.entries(CAT)
     .sort((a, b) => a[1].order - b[1].order)
+    .filter(([cat]) => cat !== "OTHER")
     .map(([cat]) => ({ category: cat, items: items.filter(i => i.category === cat) }))
     .filter(g => g.items.length > 0);
 
